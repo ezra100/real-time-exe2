@@ -128,10 +128,10 @@ void Parallelism::countdownTasks() {//@@@*
 		if (context[i].cyclesNumCountdown > 0) {//if there are still cycles left
 			if (context[i].nextCycleCountdown > 0) {
 				context[i].nextCycleCountdown--;
-				if (context[i].status == NOT_ACTIVE) {
-					context[i].cyclesNumCountdown--;
-					context[i].reDeclare();
-				}
+				// if (context[i].status == NOT_ACTIVE) {
+				// 	context[i].cyclesNumCountdown--;
+				// 	context[i].reDeclare();
+				// }
 			}
 			else {
 				if (context[i].status == NOT_ACTIVE) {
@@ -208,7 +208,7 @@ int Parallelism::contextSwitchOn() //@@ex2 changed all "contextSwitchFlag" occur
 		return 1;
 	}
 	contextSwitchFlag2[currentTask] = true;
-	contextSwitchFlag=true;
+	//contextSwitchFlag=true;
 	return 0;
 }
 
@@ -216,13 +216,13 @@ void Parallelism::contextSwitchOff() //@@ex2 changed all "contextSwitchFlag" occ
 // Disable context switch
 {
 	contextSwitchFlag2[currentTask] = false;
-	contextSwitchFlag = false;
+	//contextSwitchFlag = false;
 }
 
 int Parallelism::getContextSwitch() //@@ex2 changed all "contextSwitchFlag" occurences to contextSwitchFlag[i]
 {
 	return contextSwitchFlag2[currentTask];
-	return contextSwitchFlag;
+//	return contextSwitchFlag;
 }
 
 void Parallelism::setProgInt()
@@ -499,11 +499,15 @@ Mutex::Mutex() //@@ex2
 void Mutex::Acquire()
 {
 	SMARTS.contextSwitchOff();
-	if(available == 1)
+	if(available >= 1)
 		available = 0;
 	else {
-		if(numberSuspended >= size) return; //cant insert more tasks to queue
+		if(numberSuspended >= size) {
+			SMARTS.suspended();
+			//TODO handle this kind of error
+			return; //cant insert more tasks to queue
 		//put in queue the currentTask which consists of {taskNum, Priority}
+		}
 		int* toPut=new int[2];
 		toPut[0] = SMARTS.getCurrentTask();
 		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;

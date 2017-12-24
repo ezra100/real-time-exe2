@@ -12,53 +12,56 @@ const int ex2=1;
 // user Functions
 void a( )
 {
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   A Start    *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
+	if(ex2) SMARTS.mutex.Acquire(); 
+	//if(ex2) SMARTS.mutex.Acquire(); 
+
 	for (int j=0; j <printLoop; j++)
 	{
-		for (long i=0; i <60000; i++);
-		if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+		for (long i=0; i <200000; i++);
 		cout << "A";
-		if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
 	}
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Release();
+
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   A Finish   *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
 }
 
 void b( )
 {
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   B Start    *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
 	for (int j=0; j <printLoop; j++)
 	{
 		for (long i=0; i < 60000; i++);
-		if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+		if(ex2) SMARTS.mutex.Acquire(); 
 		cout << "B";
-		if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+		if(ex2) SMARTS.mutex.Release();
 	}
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   B Finish   *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
 }
 
 void c( )
 {
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   C Start    *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
 	for (int j=0; j <printLoop; j++)
 	{
 		for (long i=0; i < 60000; i++);
-		if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+		if(ex2) SMARTS.mutex.Acquire(); 
 		cout << "C";
-		if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+		if(ex2) SMARTS.mutex.Release();
 	}
-	if(ex2) SMARTS.mutex.Acquire(); else SMARTS.contextSwitchOff();
+	if(ex2) SMARTS.mutex.Acquire(); 
 	cout << "\n *************   C Finish   *********************";
-	if(ex2) SMARTS.mutex.Release(); else SMARTS.contextSwitchOn();
+	if(ex2) SMARTS.mutex.Release();
 }
 
 void main( )
@@ -70,9 +73,9 @@ void main( )
 	SMARTS.declareTask(c, 'C', 25, 4);*/
 
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(a, 'A', 402, 4); //402=not important. 400=most important
-	SMARTS.declareTask(b, 'B', 401, 5);
-	SMARTS.declareTask(c, 'C', 400, 3);
+	SMARTS.declareTask(a, 'A', 50, 4); //402=not important. 400=most important
+	SMARTS.declareTask(b, 'B', 27, 5);
+//	SMARTS.declareTask(c, 'C', 40, 3);
 
 	SMARTS.runTheTasks();
 	int x;
