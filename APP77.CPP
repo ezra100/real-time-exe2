@@ -77,7 +77,7 @@ void main( )
 	SMARTS.declareTask(b, 'B', 27, 5);
 //	SMARTS.declareTask(c, 'C', 40, 3);
 
-	SMARTS.runTheTasks();
+	SMARTS.runTheTasks(); //
 	int x;
 	cin>>x;
 }
