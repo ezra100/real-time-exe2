@@ -23,7 +23,7 @@ enum taskStatus {READY, NOT_ACTIVE, SUSPENDED, SLEEP, UNDEFINED, FINISHED_ALL_CY
 
 /**********    Classes    **********/
 class Event
-{
+{//
 private:
 	int  flag;       // arrived flag
 	void *data;      // the parameter
