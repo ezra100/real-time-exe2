@@ -317,15 +317,15 @@ void Parallelism::incrPriority(int taskNum)
 	if (taskNum < totalTasks)
 		context[taskNum].incrPriority();
 }
-void Parallelism::setOriginalPriority(int taskNum)
+void Parallelism::setToOriginalPriority(int taskNum)
 {
 	if (taskNum < totalTasks)
-		context[taskNum].setOriginalPriority();
+		context[taskNum].setToOriginalPriority();
 }
 
-void Parallelism::setCurrentOriginalPriority()
+void Parallelism::setCurrentTasklToOriginalPriority()
 {
-	context[currentTask].setOriginalPriority();
+	context[currentTask].setToOriginalPriority();
 }
 
 Event *Parallelism::getExpectedEvent(int taskNum)
@@ -485,7 +485,7 @@ void Task::incrPriority()
 	--currentPriority;
 }
 //----------------------------------------------------
-void Task::setOriginalPriority()
+void Task::setToOriginalPriority()
 {
 	currentPriority = priority;
 }
@@ -536,7 +536,7 @@ void Mutex::Acquire()
 		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
 		Put(toPut);
 		numberSuspended++;
-		SMARTS.setCurrentOriginalPriority
+		SMARTS.setCurrentTasklToOriginalPriority
 		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
 		SMARTS.suspended();
 		//printf("passed suspending\n");

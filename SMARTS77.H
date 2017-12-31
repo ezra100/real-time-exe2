@@ -65,7 +65,7 @@ public:
 	void declare(void far *code, void far *taskEnd, char name, int cycleTime, int cyclesNum); //@@@@@@ ADDED 2 ARGS (LAST 2)
 	void sleepDecr();
 	void incrPriority();
-	void setOriginalPriority();
+	void setToOriginalPriority();
 };
 //SMARTS uses this mutex
 class Mutex //@@ex2	(implemented with a Proirity Queue)
@@ -150,8 +150,8 @@ public:
 	void setCurrentNotActive();
 	void suspended();
 	void incrPriority(int taskNum );
-	void setOriginalPriority(int taskNum );
-	void setCurrentOriginalPriority();
+	void setToOriginalPriority(int taskNum );
+	void setCurrentTasklToOriginalPriority();
 	Event *getExpectedEvent(int taskNum);
 	Event *getCurrentExpectedEvent();
 	void setCurrentExpectedEvent(Event *expectedEvent);
