@@ -536,7 +536,7 @@ void Mutex::Acquire()
 		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
 		Put(toPut);
 		numberSuspended++;
-		SMARTS.setCurrentTasklToOriginalPriority
+		SMARTS.setCurrentTasklToOriginalPriority();
 		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
 		SMARTS.suspended();
 		//printf("passed suspending\n");
