@@ -24,6 +24,8 @@ unsigned getTimerClocks()
 	clocks += inportb(0x40) << 8;
 	return clocks;
 }
+
+#pragma region Parallelism
 ////////////////////////////////////////////////////
 /**********    class body:  Parallelism     **********/
 Parallelism::Parallelism()
@@ -419,7 +421,9 @@ int Parallelism::getPriority(int taskNum) //@@ex2
 {
 	return context;
 }*/
+#pragma endregion
 
+#pragma region Task
 /**********    class body:  Task     **********/
 Task::Task()
 {
@@ -501,7 +505,8 @@ void Task::sleepDecr()
 			status = READY;
 	}
 }
-
+#pragma endregion
+#pragma region Mutex
 Mutex::Mutex() //@@ex2
 {
 	size = MaxTask;
@@ -586,3 +591,4 @@ int *Mutex::Get() //gets the highest priority task
 	fixQueue(indexHighest);
 	return highest; //returns {taskNum, Priority} whose priority is highest
 }
+#pragma endregion
