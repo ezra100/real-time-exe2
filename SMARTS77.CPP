@@ -506,6 +506,7 @@ Mutex::Mutex() //@@ex2
 {
 	size = MaxTask;
 	available = 1;
+	owner = -1;
 	numberSuspended = 0;
 	//queue = new int[size];
 	queue = new int *[size];
@@ -518,6 +519,7 @@ void Mutex::Acquire()
 	if (available >= 1)
 	{
 		available = 0;
+		owner = SMARTS.getCurrentTask();
 	}
 	else
 	{
@@ -534,6 +536,7 @@ void Mutex::Acquire()
 		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
 		Put(toPut);
 		numberSuspended++;
+		SMARTS.setCurrentOriginalPriority
 		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
 		SMARTS.suspended();
 		//printf("passed suspending\n");

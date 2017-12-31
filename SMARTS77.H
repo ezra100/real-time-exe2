@@ -20,7 +20,6 @@
 #define MaxTask 15
 #define MaxStack 512
 enum taskStatus {READY, NOT_ACTIVE, SUSPENDED, SLEEP, UNDEFINED, FINISHED_ALL_CYCLES};//@@@*
-
 /**********    Classes    **********/
 class Event
 {//
@@ -75,6 +74,7 @@ private:
 	int size; // = totalTasks
 	int available;
 	int numberSuspended;
+	int owner;
 	//int* queue;
 	int** queue; //2d array to save each task's {taskNum, Priority}
 	void Put(int* task); //puts task into the queue. task consists of {taskNum, Priority}
