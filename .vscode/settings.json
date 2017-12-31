@@ -1,0 +1,8 @@
+{
+    "files.exclude": {
+        "**/*.OBJ": true,
+        "**/*.SWP": true,
+        "**/*.DSK": true,
+        "**/*.EXE": true
+      }
+}
