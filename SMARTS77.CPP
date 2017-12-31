@@ -7,6 +7,10 @@
 /****************************************************************/
 #include "smarts77.h"
 #include <string.h>
+#define debug true
+#if debug
+
+#endif
 /**********    Function     **********/
 unsigned getTimerClocks()
 // Gets the remaining clocks of the timer register
@@ -32,15 +36,16 @@ Parallelism::Parallelism()
 	timeFromStart = 0;
 	isThereCyclePassedError = false;
 	deadlock = false;
-	for(int i=0; i<MaxTask; i++) contextSwitchFlag2[i]=true; //@@ex2 (make each task a flag)
+	for (int i = 0; i < MaxTask; i++)
+		contextSwitchFlag2[i] = true; //@@ex2 (make each task a flag)
 	contextSwitchFlag = true;
 	endOfTimeSlice = true;
 }
 
-void Parallelism::externalFunctions(void interrupt(*timerInterruptHandler)(...),
-	void far *scheduler, void far *userTaskEnd,
-	int far(*algorithm)())
-	// Sets the external functions
+void Parallelism::externalFunctions(void interrupt (*timerInterruptHandler)(...),
+									void far *scheduler, void far *userTaskEnd,
+									int far (*algorithm)())
+// Sets the external functions
 {
 	this->timerInterruptHandler = timerInterruptHandler;
 	this->scheduler = scheduler;
@@ -52,7 +57,7 @@ void Parallelism::externalFunctions(void interrupt(*timerInterruptHandler)(...),
 }
 
 int Parallelism::declareTask(void far *code, char name, int cycleTime, int cyclesNum) //@@@@@@ ADDED 2 ARGS (LAST 2)
-		// Insert a new task entry in SMARTS context array [ ]
+																					  // Insert a new task entry in SMARTS context array [ ]
 {
 	if (totalTasks < MaxTask - 1)
 	{
@@ -66,25 +71,25 @@ int Parallelism::declareTask(void far *code, char name, int cycleTime, int cycle
 }
 
 void Parallelism::runTheTasks()
-// Start running all tasks declared in SMARTS.		
+// Start running all tasks declared in SMARTS.
 {
-	context[totalTasks].status = READY;	//for task 'runTheTasks' (IDLE task)
+	context[totalTasks].status = READY; //for task 'runTheTasks' (IDLE task)
 	context[totalTasks].priority = MAXINT;
 	context[totalTasks].currentPriority = MAXINT;
 
 	currentTask = totalTasks;
 
-	asm	cli;		// forbids interrupts (clear interrupts) while changing the interrupt vect
-		// saves the original BIOS userInt in our variable 'userIntAddress' to be restored at the end
-	userIntAddress = getvect(userInt);	// BIOS userInt 0x60  (unused by PC)
-				// puts the normal BIOS timerInt into the unused userInt address
-	setvect(userInt, getvect(timerInt));	// timerInt 0x08 
+	asm cli;							 // forbids interrupts (clear interrupts) while changing the interrupt vect
+										 // saves the original BIOS userInt in our variable 'userIntAddress' to be restored at the end
+	userIntAddress = getvect(userInt);   // BIOS userInt 0x60  (unused by PC)
+										 // puts the normal BIOS timerInt into the unused userInt address
+	setvect(userInt, getvect(timerInt)); // timerInt 0x08
 
 	// sets our SMARTS external function 'timerInterruptHandler' as the new PC hard interrupt time handler
 	setvect(timerInt, timerInterruptHandler);
-	asm	sti;	// allows back interrupts (set interrupts)
+	asm sti; // allows back interrupts (set interrupts)
 
-		// waits for end of runTheTasks (end of all the tasks)
+	// waits for end of runTheTasks (end of all the tasks)
 	while (true)
 	{
 		if (deadlock)
@@ -98,7 +103,8 @@ void Parallelism::runTheTasks()
 			cprintf("\n\n\rExit :SMARTS finished all tasks");
 			break;
 		}
-		if (isThereCyclePassedError) {
+		if (isThereCyclePassedError)
+		{
 
 			textcolor(RED);
 			cprintf("\n\n\rError: task '%c' has passed a cycle without running", errorTaskName);
@@ -107,52 +113,60 @@ void Parallelism::runTheTasks()
 	}
 	cprintf("\n\rTime passed: %d sec/18", timeFromStart);
 	// restore the original BIOS 'interrupt vector' at the end before returning to regular DOS
-	asm	cli;	// no interrupts
-	setvect(timerInt, getvect(userInt));	// restore original BIOS time handler
+	asm cli;							 // no interrupts
+	setvect(timerInt, getvect(userInt)); // restore original BIOS time handler
 	setvect(userInt, userIntAddress);	// restore original BIOS userInt
-	asm	sti;	// yes interrupts
-
+	asm sti;							 // yes interrupts
 }
 
-int Parallelism::getIsThereCyclePassedError() {
+int Parallelism::getIsThereCyclePassedError()
+{
 	return isThereCyclePassedError;
 }
 
-void Parallelism::countdownTasks() {//@@@*
+void Parallelism::countdownTasks()
+{ //@@@*
 	//cout<<"["<<timeFromStart<<"]";
-	for (int i = 0; i < totalTasks; i++) {
-		if (context[i].status == FINISHED_ALL_CYCLES) {
+	for (int i = 0; i < totalTasks; i++)
+	{
+		if (context[i].status == FINISHED_ALL_CYCLES)
+		{
 			continue;
 		}
 		//if(i==0) cout<<"("<<context[i].name<<":"<<context[i].nextCycleCountdown<<","<<context[i].cyclesNumCountdown<<":"<<context[i].status<<")";
-		if (context[i].cyclesNumCountdown > 0) {//if there are still cycles left
-			if (context[i].nextCycleCountdown > 0) {
+		if (context[i].cyclesNumCountdown > 0)
+		{ //if there are still cycles left
+			if (context[i].nextCycleCountdown > 0)
+			{
 				context[i].nextCycleCountdown--;
 				// if (context[i].status == NOT_ACTIVE) {
 				// 	context[i].cyclesNumCountdown--;
 				// 	context[i].reDeclare();
 				// }
 			}
-			else {
-				if (context[i].status == NOT_ACTIVE) {
+			else
+			{
+				if (context[i].status == NOT_ACTIVE)
+				{
 					context[i].cyclesNumCountdown--;
 					context[i].reDeclare();
 				}
-				else {//if the cycle ended and the task didn't run yet
+				else
+				{ //if the cycle ended and the task didn't run yet
 					cyclePassedError(context[i].name);
 				}
 			}
 		}
-		else {
-			if (context[i].status == NOT_ACTIVE) {
+		else
+		{
+			if (context[i].status == NOT_ACTIVE)
+			{
 				context[i].status = FINISHED_ALL_CYCLES;
 				cyclesRemainingTasks--;
 			}
 		}
 	}
-
 }
-
 
 void Parallelism::callScheduler()
 // Return the control to the scheduler, this sets ON the software interrupt ProgInt flag
@@ -204,7 +218,7 @@ int Parallelism::contextSwitchOn() //@@ex2 changed all "contextSwitchFlag" occur
 		endOfTimeSlice = false;
 		contextSwitchFlag2[currentTask] = true;
 		contextSwitchFlag = true;
-		callScheduler();	// return control to the scheduler
+		callScheduler(); // return control to the scheduler
 		return 1;
 	}
 	contextSwitchFlag2[currentTask] = true;
@@ -222,12 +236,12 @@ void Parallelism::contextSwitchOff() //@@ex2 changed all "contextSwitchFlag" occ
 int Parallelism::getContextSwitch() //@@ex2 changed all "contextSwitchFlag" occurences to contextSwitchFlag[i]
 {
 	return contextSwitchFlag2[currentTask];
-//	return contextSwitchFlag;
+	//	return contextSwitchFlag;
 }
 
 void Parallelism::setProgInt()
-// flag indicates to the extern function 'timerInterruptHandler' 
-// that this is an internal SMARTS software interrupt call, 
+// flag indicates to the extern function 'timerInterruptHandler'
+// that this is an internal SMARTS software interrupt call,
 // and the original BIOS function has no to be called.
 {
 	progInt = true;
@@ -244,13 +258,13 @@ int Parallelism::getProgInt()
 }
 
 void Parallelism::setEndOfTimeSlice()
-// flag indicates that when 'context switch' will be enabled, 
+// flag indicates that when 'context switch' will be enabled,
 // it must also return the control to the scheduler.
 {
 	endOfTimeSlice = true;
 }
 
-char Parallelism::getName(int taskNum)	// returns name found or ' ' if not
+char Parallelism::getName(int taskNum) // returns name found or ' ' if not
 {
 	return (taskNum <= totalTasks) ? context[taskNum].name : ' ';
 }
@@ -286,7 +300,6 @@ void Parallelism::resume(char taskName)
 		if (context[i].name == taskName)
 			context[i].status = READY;
 }
-
 
 void Parallelism::setCurrentNotActive()
 {
@@ -339,7 +352,7 @@ void Parallelism::sleep(int t)
 		context[currentTask].sleepCount = t / 55 + 1;
 		context[currentTask].status = SLEEP;
 		++sleepTasks;
-		callScheduler();		// return control to scheduler
+		callScheduler(); // return control to scheduler
 	}
 }
 
@@ -383,17 +396,18 @@ void Parallelism::handleTimers()
 		}
 	}
 	timeFromStart++;
-	countdownTasks();//@@@*
+	countdownTasks(); //@@@*
 }
 
 void Parallelism::taskEnd()
 // This function is called after the last operation of a task, instead of function return
 {
 	SMARTS.setCurrentNotActive();
-	SMARTS.callScheduler();	// return the control to the scheduler to run a next task
+	SMARTS.callScheduler(); // return the control to the scheduler to run a next task
 }
 
-void Parallelism::cyclePassedError(char taskName) {
+void Parallelism::cyclePassedError(char taskName)
+{
 	isThereCyclePassedError = true;
 	errorTaskName = taskName;
 }
@@ -438,7 +452,7 @@ void Task::declare(void far *code, void far *userTaskEnd, char name, int cycleTi
 	this->cyclesNum = cyclesNum; //@@@@@@ ADDED (ex1)
 	this->cycleTime = cycleTime; //@@@@@@ ADDED (ex1)
 	nextCycleCountdown = cycleTime;
-	cyclesNumCountdown = cyclesNum - 1;//decrease by 1 since the first round will start automaticaly
+	cyclesNumCountdown = cyclesNum - 1; //decrease by 1 since the first round will start automaticaly
 	status = READY;
 	currentPriority = priority = cycleTime; //@@ex2
 }
@@ -490,62 +504,76 @@ void Task::sleepDecr()
 
 Mutex::Mutex() //@@ex2
 {
-    size = MaxTask;
+	size = MaxTask;
 	available = 1;
 	numberSuspended = 0;
 	//queue = new int[size];
-	queue = new int*[size];
+	queue = new int *[size];
 }
 void Mutex::Acquire()
 {
 	SMARTS.contextSwitchOff();
-	if(available >= 1)
+	//printf("%d", available);
+
+	if (available >= 1)
+	{
 		available = 0;
-	else {
-		if(numberSuspended >= size) {
+	}
+	else
+	{
+		if (numberSuspended >= size)
+		{
+			printf("ERROR number of tasks waiting for mutex is too big");
 			SMARTS.suspended();
 			//TODO handle this kind of error
 			return; //cant insert more tasks to queue
-		//put in queue the currentTask which consists of {taskNum, Priority}
+					//put in queue the currentTask which consists of {taskNum, Priority}
 		}
-		int* toPut=new int[2];
+		int *toPut = new int[2];
 		toPut[0] = SMARTS.getCurrentTask();
 		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
 		Put(toPut);
 		numberSuspended++;
+		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
 		SMARTS.suspended();
+		//printf("passed suspending\n");
 	}
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Release()
 {
 	SMARTS.contextSwitchOff();
-	if(numberSuspended > 0) {
+	if (numberSuspended > 0)
+	{
+		//debug
+		//		printf("awaking task %d \n", SMARTS.getCurrentTask());
 		numberSuspended--;
 		//get a task from queue (with highest priority)
-		SMARTS.setCurrentTask(Get()[0]);
-		SMARTS.resume(SMARTS.getCurrentTask());
+		int task = Get()[0];
+		//SMARTS.setCurrentTask();
+		SMARTS.resume(task);
 	}
-	else available = 1;
+	else
+		available = 1;
 	SMARTS.contextSwitchOn();
 }
-void Mutex::Put(int* task) //puts task into the queue
+void Mutex::Put(int *task) //puts task into the queue
 {
 	queue[numberSuspended] = task; //task consists of {taskNum, Priority}
 }
 void Mutex::fixQueue(int indexHole)
 {
-	queue[indexHole]=queue[numberSuspended];
+	queue[indexHole] = queue[numberSuspended];
 	queue[numberSuspended] = NULL;
 }
-int* Mutex::Get() //gets the highest priority task
+int *Mutex::Get() //gets the highest priority task
 {
 	int highestPriority = queue[0][1];
 	int indexHighest = 0;
-	int* highest = NULL;
-	for(int i = 1; i < size ; i++)
+	int *highest = NULL;
+	for (int i = 1; i < size; i++)
 	{
-		if(queue[i] != NULL && queue[i][1] > highestPriority)
+		if (queue[i] != NULL && queue[i][1] > highestPriority)
 		{
 			highestPriority = queue[i][1];
 			indexHighest = i;

@@ -23,7 +23,10 @@ void far interrupt timerInterruptHandler(...)
 
 	// if it was called by the timer interrupt (hardware source),
 	// it calls the original BIOS routine. not to change the PC work.
-	if (!SMARTS.getProgInt())
+	int progInt = SMARTS.getProgInt();
+	//debug
+	//printf("ti:%d", progInt);
+	if (!progInt)
 	{
 		asm	int userInt;
 		SMARTS.handleTimers();
@@ -33,7 +36,7 @@ void far interrupt timerInterruptHandler(...)
 
 			// if the 'context switch' flag=true, save the current task variables
 			// and call the 'scheduler'
-	if (SMARTS.getContextSwitch() || SMARTS.getProgInt())   // save stack addr of interrupted task in current stack
+	if (SMARTS.getContextSwitch() || progInt)   // save stack addr of interrupted task in current stack
 	{
 		SMARTS.setCurrentStack(StackSegAct, StackPtrAct);
 		SMARTS.restoreSchedStack();	      // prepare activation of the task "scheduler"
@@ -59,6 +62,7 @@ void scheduler()	// this also a parallel task
 
 	// calling to the 'short term scheduler' algorithm
 	nextTask = SMARTS.getIsThereCyclePassedError() ? SMARTS.getTotalTasks() : SMARTS.algorithm();
+	//printf("task:%d ", nextTask);
 	// checking for 'deadlock' : not found task to run and tasks remain suspended
 	if (nextTask == SMARTS.getTotalTasks() &&
 		SMARTS.sleepTasks == 0 && SMARTS.activeTasks > 0)
