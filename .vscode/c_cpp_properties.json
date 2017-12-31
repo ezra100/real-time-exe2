@@ -55,7 +55,7 @@
             "browse": {
                 "path": [
                     "${workspaceRoot}",
-                    "${workspaceRoot}..\\BORLANDC\\INCLUDE"
+                    "${workspaceRoot}\\..\\BORLANDC\\INCLUDE"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
