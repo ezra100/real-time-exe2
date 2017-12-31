@@ -28,8 +28,7 @@
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "${workspaceRoot}",
-                "${workspaceRoot}..\\BORLANDC\\INCLUDE"
+                "${workspaceRoot}"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -55,7 +54,8 @@
             "intelliSenseMode": "msvc-x64",
             "browse": {
                 "path": [
-                    "${workspaceRoot}"
+                    "${workspaceRoot}",
+                    "${workspaceRoot}..\\BORLANDC\\INCLUDE"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
