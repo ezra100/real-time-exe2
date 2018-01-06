@@ -75,6 +75,7 @@ private:
 	int available;
 	int numberSuspended;
 	int owner;
+	int level;
 	//int* queue;
 	int** queue; //2d array to save each task's {taskNum, Priority}
 	void Put(int* task); //puts task into the queue. task consists of {taskNum, Priority}
