@@ -512,6 +512,7 @@ Mutex::Mutex() //@@ex2
 	size = MaxTask;
 	available = 1;
 	owner = -1;
+	level = 0;
 	numberSuspended = 0;
 	//queue = new int[size];
 	queue = new int *[size];
@@ -521,10 +522,10 @@ void Mutex::Acquire()
 	SMARTS.contextSwitchOff();
 	//printf("%d", available);
 
-	if (available >= 1)
+	if (available >= 1 || owner==SMARTS.getCurrentTask())
 	{
 		available = 0;
-		owner = SMARTS.getCurrentTask();
+		//owner = SMARTS.getCurrentTask();
 	}
 	else
 	{
@@ -546,23 +547,31 @@ void Mutex::Acquire()
 		SMARTS.suspended();
 		//printf("passed suspending\n");
 	}
+	owner = SMARTS.getCurrentTask();
+	level++;
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Release()
 {
 	SMARTS.contextSwitchOff();
-	if (numberSuspended > 0)
-	{
-		//debug
-		//		printf("awaking task %d \n", SMARTS.getCurrentTask());
-		numberSuspended--;
-		//get a task from queue (with highest priority)
-		int task = Get()[0];
-		//SMARTS.setCurrentTask();
-		SMARTS.resume(task);
+	if(owner == SMARTS.getCurrentTask()) {
+		if(--level)
+			return;
+		else {
+			if (numberSuspended > 0) {
+				//debug
+				//		printf("awaking task %d \n", SMARTS.getCurrentTask());
+				numberSuspended--;
+				//get a task from queue (with highest priority)
+				int task = Get()[0];
+				//SMARTS.setCurrentTask();
+				SMARTS.resume(task);
+			}
+			else
+				available = 1;
+		}
 	}
-	else
-		available = 1;
+	
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Put(int *task) //puts task into the queue
