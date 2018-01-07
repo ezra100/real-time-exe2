@@ -7,10 +7,7 @@
 /****************************************************************/
 #include "smarts77.h"
 #include <string.h>
-#define debug true
-#if debug
 
-#endif
 /**********    Function     **********/
 unsigned getTimerClocks()
 // Gets the remaining clocks of the timer register
@@ -42,6 +39,11 @@ Parallelism::Parallelism()
 		contextSwitchFlag2[i] = true; //@@ex2 (make each task a flag)
 	contextSwitchFlag = true;
 	endOfTimeSlice = true;
+}
+
+Mutex *Parallelism::getWaitingForMutex(int taskNum)
+{
+	return context[taskNum].waitingFor;
 }
 
 void Parallelism::updateWaitingForMutex(int taskNum, Mutex *mutex)
@@ -135,20 +137,17 @@ void Parallelism::countdownTasks()
 	//cout<<"["<<timeFromStart<<"]";
 	for (int i = 0; i < totalTasks; i++)
 	{
+		//debug
+		//printf(" %c:%d,%d,%d; ", context[i].name, context[i].status, context[i].cyclesNumCountdown, context[i].nextCycleCountdown);
 		if (context[i].status == FINISHED_ALL_CYCLES)
 		{
 			continue;
 		}
-		//if(i==0) cout<<"("<<context[i].name<<":"<<context[i].nextCycleCountdown<<","<<context[i].cyclesNumCountdown<<":"<<context[i].status<<")";
 		if (context[i].cyclesNumCountdown > 0)
 		{ //if there are still cycles left
 			if (context[i].nextCycleCountdown > 0)
 			{
 				context[i].nextCycleCountdown--;
-				// if (context[i].status == NOT_ACTIVE) {
-				// 	context[i].cyclesNumCountdown--;
-				// 	context[i].reDeclare();
-				// }
 			}
 			else
 			{
@@ -159,6 +158,8 @@ void Parallelism::countdownTasks()
 				}
 				else
 				{ //if the cycle ended and the task didn't run yet
+					//debug
+					//printf("error with %c ", context[i].name);
 					cyclePassedError(context[i].name);
 				}
 			}
@@ -531,15 +532,22 @@ Mutex::Mutex() //@@ex2
 }
 void Mutex::updateOwnerPriority()
 {
-	int priority =SMARTS.getPriority(queue[0]);
-	for (int i = 1; i < size; i++)
+	int priority = SMARTS.getPriority(queue[0]);
+	for (int i = 1; i < numberSuspended; i++)
 	{
 		if (SMARTS.getPriority(queue[i]) < priority)
 		{
 			priority = SMARTS.getPriority(queue[i]);
 		}
 	}
+	//debug
+	//printf("owner pr update");
 	SMARTS.incrPriority(owner, priority);
+	Mutex *mutex = SMARTS.getWaitingForMutex(owner);
+	if (mutex != NULL)
+	{
+		mutex->updateOwnerPriority();
+	}
 }
 void Mutex::Acquire()
 {
@@ -560,22 +568,17 @@ void Mutex::Acquire()
 			return; //cant insert more tasks to queue
 					//put in queue the currentTask which consists of {taskNum, Priority}
 		}
-		int taskNum =  SMARTS.getCurrentTask();
+		int taskNum = SMARTS.getCurrentTask();
 		Put(taskNum);
 		updateOwnerPriority();
-		numberSuspended++;
-		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
 		SMARTS.updateWaitingForMutex(SMARTS.getCurrentTask(), this);
+		//debug
+		//printf("suspending %d", taskNum);
 		SMARTS.suspended();
-
-		//need to be done before the update
-		owner = SMARTS.getCurrentTask();
-		updateOwnerPriority();
 		//printf("passed suspending\n");
 	}
 	owner = SMARTS.getCurrentTask();
 	level++;
-	SMARTS.updateWaitingForMutex(owner, NULL);
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Release()
@@ -583,21 +586,23 @@ void Mutex::Release()
 	SMARTS.contextSwitchOff();
 	if (owner == SMARTS.getCurrentTask())
 	{
-		if (--level)
+		level--;
+		if (level)
 		{
-
 			return;
 		}
 		else
 		{
 			if (numberSuspended > 0)
 			{
-				//debug
-				//		printf("awaking task %d \n", SMARTS.getCurrentTask());
-				numberSuspended--;
 				//get a task from queue (with highest priority)
 				int task = Get();
+				//debug
+				//printf("waking %d ", task);
 				//SMARTS.setCurrentTask();
+				owner = task;
+				SMARTS.updateWaitingForMutex(owner, NULL);
+				updateOwnerPriority();
 				SMARTS.resume(task);
 			}
 			else
@@ -610,6 +615,9 @@ void Mutex::Release()
 void Mutex::Put(int item) //puts task into the queue
 {
 	queue[numberSuspended] = item; //task consists of {taskNum, Priority}
+	numberSuspended++;
+	//debug
+	//printf("\n putting %d, suspended: %d\t%d,%d,%d\n", item, numberSuspended, queue[0], queue[1], queue[2]);
 }
 void Mutex::fixQueue(int indexHole)
 {
@@ -621,7 +629,7 @@ int Mutex::Get() //gets the highest priority task
 	int highestPriority = SMARTS.getPriority(queue[0]);
 	int indexHighest = 0;
 	int highest = -1;
-	for (int i = 1; i < size; i++)
+	for (int i = 1; i < numberSuspended; i++)
 	{
 		if (queue[i] != -1 && SMARTS.getPriority(queue[i]) > highestPriority)
 		{
@@ -630,7 +638,10 @@ int Mutex::Get() //gets the highest priority task
 		}
 	}
 	highest = queue[indexHighest];
+	numberSuspended--;
 	fixQueue(indexHighest);
+	//debug
+	//printf("\n suspended: %d\t%d,%d,%d\n highestIndex:%d, highest: %d", numberSuspended, queue[0], queue[1], queue[2], indexHighest, highest);
 	return highest; //returns {taskNum, Priority} whose priority is highest
 }
 #pragma endregion

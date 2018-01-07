@@ -74,9 +74,12 @@ void c()
 			;
 
 		SMARTS.mutex.Acquire();
+		SMARTS.mutex.Acquire();
+
 		cout << "C";
 		cout << "C";
 		cout << "C";
+		SMARTS.mutex.Release();
 
 		SMARTS.mutex.Release();
 	}
@@ -96,9 +99,9 @@ void main()
 	SMARTS.declareTask(c, 'C', 25, 4);*/
 
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(a, 'A', 51, 4);											//402=not important. 400=most important
-	SMARTS.declareTask(b, 'B', 26, 5);
-	SMARTS.declareTask(c, 'C', 40, 3);
+	SMARTS.declareTask(a, 'A', 99, 3);											//402=not important. 400=most important
+	SMARTS.declareTask(b, 'B', 53, 3);
+	SMARTS.declareTask(c, 'C', 53, 3);
 
 	SMARTS.runTheTasks(); //
 	int x;
