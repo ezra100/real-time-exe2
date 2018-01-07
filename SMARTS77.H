@@ -20,6 +20,12 @@
 #define MaxTask 15
 #define MaxStack 512
 enum taskStatus {READY, NOT_ACTIVE, SUSPENDED, SLEEP, UNDEFINED, FINISHED_ALL_CYCLES};//@@@*
+class Mutex;
+
+struct QueueItem{
+	int priority;
+	int taskNum;
+};
 /**********    Classes    **********/
 class Event
 {//
@@ -48,24 +54,28 @@ class Task
 	void far *code;
 	void far *userTaskEnd;
 public:
+
 	void reDeclare();
 	int cyclesNum;		//@@@@@@ cycles num (ex1)
 	int cycleTime;		//@@@@@@ cycles time (ex1)
 	int nextCycleCountdown; //@@@*
 	int cyclesNumCountdown;//@@@*
+	Mutex* waitingFor;
 	char name;                      // task name
 	unsigned stack[MaxStack];       // the stack
 	unsigned stackSeg, stackPtr;    // the stack pointer
 	int currentPriority;            // the priority of the task
-	int priority;                   // the original priority
+	int originalPriority;                   // the original priority
 	taskStatus status;              // the status of the task
 	Event *expectedEvent;           // the event that this task is waiting for
 	int sleepCount;                 // the sleep remainder time
 	Task();
 	void declare(void far *code, void far *taskEnd, char name, int cycleTime, int cyclesNum); //@@@@@@ ADDED 2 ARGS (LAST 2)
 	void sleepDecr();
-	void incrPriority();
+	void incrPriority( int priority);
 	void setToOriginalPriority();
+
+	int getOriginalPriority();
 };
 //SMARTS uses this mutex
 class Mutex //@@ex2	(implemented with a Proirity Queue)
@@ -77,10 +87,11 @@ private:
 	int owner;
 	int level;
 	//int* queue;
-	int** queue; //2d array to save each task's {taskNum, Priority}
-	void Put(int* task); //puts task into the queue. task consists of {taskNum, Priority}
-	int* Get(); //gets the highest priority task
+	QueueItem* queue ; //2d array to save each task's {taskNum, Priority}
+	void Put(QueueItem* task); //puts task into the queue. task consists of {taskNum, Priority}
+	QueueItem* Get(); //gets the highest priority task
 	void fixQueue(int); //make all elements gathered together after "Get" function (so there wont be holes)
+	void updateOwnerPriority();
 public:
 	Mutex();
 	void Acquire();
@@ -113,6 +124,7 @@ private:
 	char errorTaskName;
 public:
 	Mutex mutex;
+	void updateWaitingForMutex(int taskNum, Mutex*);
 	int getIsThereCyclePassedError();
 	int sleepTasks;         // indicates how many task is sleeping, and it can't be deadlock
 	int activeTasks;        // indicates how many task is activate 
@@ -150,7 +162,7 @@ public:
 	void resume(char taskName);
 	void setCurrentNotActive();
 	void suspended();
-	void incrPriority(int taskNum );
+	void incrPriority(int taskNum, int priority );
 	void setToOriginalPriority(int taskNum );
 	void setCurrentTasklToOriginalPriority();
 	Event *getExpectedEvent(int taskNum);

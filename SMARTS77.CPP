@@ -44,6 +44,10 @@ Parallelism::Parallelism()
 	endOfTimeSlice = true;
 }
 
+void Parallelism::updateWaitingForMutex(int taskNum, Mutex *mutex)
+{
+	context[taskNum].waitingFor = mutex;
+}
 void Parallelism::externalFunctions(void interrupt (*timerInterruptHandler)(...),
 									void far *scheduler, void far *userTaskEnd,
 									int far (*algorithm)())
@@ -76,7 +80,7 @@ void Parallelism::runTheTasks()
 // Start running all tasks declared in SMARTS.
 {
 	context[totalTasks].status = READY; //for task 'runTheTasks' (IDLE task)
-	context[totalTasks].priority = MAXINT;
+	context[totalTasks].originalPriority = MAXINT;
 	context[totalTasks].currentPriority = MAXINT;
 
 	currentTask = totalTasks;
@@ -314,10 +318,10 @@ void Parallelism::suspended()
 	callScheduler();
 }
 
-void Parallelism::incrPriority(int taskNum)
+void Parallelism::incrPriority(int taskNum, int priority)
 {
 	if (taskNum < totalTasks)
-		context[taskNum].incrPriority();
+		context[taskNum].incrPriority(priority);
 }
 void Parallelism::setToOriginalPriority(int taskNum)
 {
@@ -415,7 +419,7 @@ void Parallelism::cyclePassedError(char taskName)
 }
 int Parallelism::getPriority(int taskNum) //@@ex2
 {
-	return context[taskNum].priority;
+	return context[taskNum].originalPriority;
 }
 /*Task[15]& Parallelism::getContext() //@@ex2
 {
@@ -440,7 +444,8 @@ Task::Task()
 	stackPtr = FP_OFF(&stack[MaxStack - 14]);
 	status = NOT_ACTIVE;
 	sleepCount = 0;
-	currentPriority = priority = 0;
+	waitingFor = NULL;
+	currentPriority = originalPriority = 0;
 }
 //-----------------------------------------------------
 void Task::declare(void far *code, void far *userTaskEnd, char name, int cycleTime, int cyclesNum) //@@@@@@ ADDED 2 ARGS (LAST 2)
@@ -458,7 +463,7 @@ void Task::declare(void far *code, void far *userTaskEnd, char name, int cycleTi
 	nextCycleCountdown = cycleTime;
 	cyclesNumCountdown = cyclesNum - 1; //decrease by 1 since the first round will start automaticaly
 	status = READY;
-	currentPriority = priority = cycleTime; //@@ex2
+	currentPriority = originalPriority = cycleTime; //@@ex2
 }
 
 void Task::reDeclare()
@@ -484,14 +489,17 @@ void Task::reDeclare()
 	status = READY;
 }
 //----------------------------------------------------
-void Task::incrPriority()
+void Task::incrPriority(int priority)
 {
-	--currentPriority;
+	if (currentPriority > priority)
+	{
+		currentPriority = priority;
+	}
 }
 //----------------------------------------------------
 void Task::setToOriginalPriority()
 {
-	currentPriority = priority;
+	currentPriority = originalPriority;
 }
 //----------------------------------------------------
 void Task::sleepDecr()
@@ -505,6 +513,10 @@ void Task::sleepDecr()
 			status = READY;
 	}
 }
+int Task::getOriginalPriority()
+{
+	return originalPriority;
+}
 #pragma endregion
 #pragma region Mutex
 Mutex::Mutex() //@@ex2
@@ -515,17 +527,28 @@ Mutex::Mutex() //@@ex2
 	level = 0;
 	numberSuspended = 0;
 	//queue = new int[size];
-	queue = new int *[size];
+	queue = new QueueItem[size];
+}
+void Mutex::updateOwnerPriority(int priority)
+{
+	int priority = queue[0].priority;
+	for (int i = 1; i < size; i++)
+	{
+		if (queue[i].priority < priority)
+		{
+			priority = queue[i].priority;
+		}
+	}
+	SMARTS.incrPriority(owner, priority);
 }
 void Mutex::Acquire()
 {
 	SMARTS.contextSwitchOff();
 	//printf("%d", available);
 
-	if (available >= 1 || owner==SMARTS.getCurrentTask())
+	if (available >= 1 || owner == SMARTS.getCurrentTask())
 	{
 		available = 0;
-		//owner = SMARTS.getCurrentTask();
 	}
 	else
 	{
@@ -537,33 +560,45 @@ void Mutex::Acquire()
 			return; //cant insert more tasks to queue
 					//put in queue the currentTask which consists of {taskNum, Priority}
 		}
-		int *toPut = new int[2];
-		toPut[0] = SMARTS.getCurrentTask();
-		toPut[1] = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
+		QueueItem *toPut = new QueueItem();
+		toPut.taskNum = SMARTS.getCurrentTask();
+		toPut.priority = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
 		Put(toPut);
+		updateOwnerPriority();
 		numberSuspended++;
-		SMARTS.setCurrentTasklToOriginalPriority();
 		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
+		SMARTS.updateWaitingForMutex(SMARTS.getCurrentTask(), this);
 		SMARTS.suspended();
+
+		//need to be done before the update
+		owner = SMARTS.getCurrentTask();
+		updateOwnerPriority();
 		//printf("passed suspending\n");
 	}
 	owner = SMARTS.getCurrentTask();
 	level++;
+	SMARTS.updateWaitingForMutex(owner, NULL);
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Release()
 {
 	SMARTS.contextSwitchOff();
-	if(owner == SMARTS.getCurrentTask()) {
-		if(--level)
+	if (owner == SMARTS.getCurrentTask())
+	{
+		if (--level)
+		{
+
 			return;
-		else {
-			if (numberSuspended > 0) {
+		}
+		else
+		{
+			if (numberSuspended > 0)
+			{
 				//debug
 				//		printf("awaking task %d \n", SMARTS.getCurrentTask());
 				numberSuspended--;
 				//get a task from queue (with highest priority)
-				int task = Get()[0];
+				int task = Get().taskNum;
 				//SMARTS.setCurrentTask();
 				SMARTS.resume(task);
 			}
@@ -571,28 +606,28 @@ void Mutex::Release()
 				available = 1;
 		}
 	}
-	
+
 	SMARTS.contextSwitchOn();
 }
-void Mutex::Put(int *task) //puts task into the queue
+void Mutex::Put(QueueItem *item) //puts task into the queue
 {
-	queue[numberSuspended] = task; //task consists of {taskNum, Priority}
+	queue[numberSuspended] = item; //task consists of {taskNum, Priority}
 }
 void Mutex::fixQueue(int indexHole)
 {
 	queue[indexHole] = queue[numberSuspended];
 	queue[numberSuspended] = NULL;
 }
-int *Mutex::Get() //gets the highest priority task
+QueueItem *Mutex::Get() //gets the highest priority task
 {
-	int highestPriority = queue[0][1];
+	int highestPriority = queue[0].priority;
 	int indexHighest = 0;
 	int *highest = NULL;
 	for (int i = 1; i < size; i++)
 	{
-		if (queue[i] != NULL && queue[i][1] > highestPriority)
+		if (queue[i] != NULL && queue[i].priority > highestPriority)
 		{
-			highestPriority = queue[i][1];
+			highestPriority = queue[i].priority;
 			indexHighest = i;
 		}
 	}
