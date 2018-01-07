@@ -22,10 +22,7 @@
 enum taskStatus {READY, NOT_ACTIVE, SUSPENDED, SLEEP, UNDEFINED, FINISHED_ALL_CYCLES};//@@@*
 class Mutex;
 
-struct QueueItem{
-	int priority;
-	int taskNum;
-};
+
 /**********    Classes    **********/
 class Event
 {//
@@ -87,9 +84,9 @@ private:
 	int owner;
 	int level;
 	//int* queue;
-	QueueItem* queue ; //2d array to save each task's {taskNum, Priority}
-	void Put(QueueItem* task); //puts task into the queue. task consists of {taskNum, Priority}
-	QueueItem* Get(); //gets the highest priority task
+	int* queue ; //2d array to save each task's {taskNum, Priority}
+	void Put(int task); //puts task into the queue. task consists of {taskNum, Priority}
+	int Get(); //gets the highest priority task
 	void fixQueue(int); //make all elements gathered together after "Get" function (so there wont be holes)
 	void updateOwnerPriority();
 public:

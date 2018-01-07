@@ -527,16 +527,16 @@ Mutex::Mutex() //@@ex2
 	level = 0;
 	numberSuspended = 0;
 	//queue = new int[size];
-	queue = new QueueItem[size];
+	queue = new int[size];
 }
-void Mutex::updateOwnerPriority(int priority)
+void Mutex::updateOwnerPriority()
 {
-	int priority = queue[0].priority;
+	int priority =SMARTS.getPriority(queue[0]);
 	for (int i = 1; i < size; i++)
 	{
-		if (queue[i].priority < priority)
+		if (SMARTS.getPriority(queue[i]) < priority)
 		{
-			priority = queue[i].priority;
+			priority = SMARTS.getPriority(queue[i]);
 		}
 	}
 	SMARTS.incrPriority(owner, priority);
@@ -560,10 +560,8 @@ void Mutex::Acquire()
 			return; //cant insert more tasks to queue
 					//put in queue the currentTask which consists of {taskNum, Priority}
 		}
-		QueueItem *toPut = new QueueItem();
-		toPut.taskNum = SMARTS.getCurrentTask();
-		toPut.priority = SMARTS.getPriority(SMARTS.getCurrentTask()); //SMARTS.context[SMARTS.getCurrentTask()].priority;
-		Put(toPut);
+		int taskNum =  SMARTS.getCurrentTask();
+		Put(taskNum);
 		updateOwnerPriority();
 		numberSuspended++;
 		//printf("acquire waiting %d \n", SMARTS.getCurrentTask());
@@ -598,7 +596,7 @@ void Mutex::Release()
 				//		printf("awaking task %d \n", SMARTS.getCurrentTask());
 				numberSuspended--;
 				//get a task from queue (with highest priority)
-				int task = Get().taskNum;
+				int task = Get();
 				//SMARTS.setCurrentTask();
 				SMARTS.resume(task);
 			}
@@ -609,25 +607,25 @@ void Mutex::Release()
 
 	SMARTS.contextSwitchOn();
 }
-void Mutex::Put(QueueItem *item) //puts task into the queue
+void Mutex::Put(int item) //puts task into the queue
 {
 	queue[numberSuspended] = item; //task consists of {taskNum, Priority}
 }
 void Mutex::fixQueue(int indexHole)
 {
 	queue[indexHole] = queue[numberSuspended];
-	queue[numberSuspended] = NULL;
+	queue[numberSuspended] = -1;
 }
-QueueItem *Mutex::Get() //gets the highest priority task
+int Mutex::Get() //gets the highest priority task
 {
-	int highestPriority = queue[0].priority;
+	int highestPriority = SMARTS.getPriority(queue[0]);
 	int indexHighest = 0;
-	int *highest = NULL;
+	int highest = -1;
 	for (int i = 1; i < size; i++)
 	{
-		if (queue[i] != NULL && queue[i].priority > highestPriority)
+		if (queue[i] != -1 && SMARTS.getPriority(queue[i]) > highestPriority)
 		{
-			highestPriority = queue[i].priority;
+			highestPriority = SMARTS.getPriority(queue[i]);
 			indexHighest = i;
 		}
 	}
