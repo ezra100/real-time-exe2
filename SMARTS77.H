@@ -28,7 +28,7 @@ enum taskStatus
 	UNDEFINED,
 	FINISHED_ALL_CYCLES
 }; //@@@*
-class Mutex;
+class Mutex;//
 
 /**********    Classes    **********/
 class Event
