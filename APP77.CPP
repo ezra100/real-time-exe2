@@ -10,28 +10,24 @@ const int emptyLoop = 6000;
 const int printLoop = 15;
 const int ex2 = 1;
 // user Functions
+
+Event event;
+Event bEvent;
 void a()
 {
 
 	SMARTS.mutex.Acquire();
 	cout << "\n *************   A Start    *********************";
-
-	SMARTS.mutex.Release();
-
+	void *data = new int[0];
+	event.send('C', data, true);
+	bEvent.send('B', data, true);
 	for (int j = 0; j < printLoop; j++)
 	{
-		for (long i = 0; i < 200000; i++)
+		for (long i = 0; i < 60000; i++)
 			;
-		if (ex2)
-			SMARTS.mutex.Acquire();
-
 		cout << "A";
-		cout << "A";
-		cout << "A";
-		SMARTS.mutex.Release();
 	}
 
-	SMARTS.mutex.Acquire();
 	cout << "\n *************   A Finish   *********************";
 
 	SMARTS.mutex.Release();
@@ -39,52 +35,33 @@ void a()
 
 void b()
 {
-	SMARTS.mutex.Acquire();
+	bEvent.wait(' ');
 	cout << "\n *************   B Start    *********************";
-	SMARTS.mutex.Release();
 	for (int j = 0; j < printLoop; j++)
 	{
-		for (long i = 0; i < 60000; i++)
+		for (long i = 0; i < 6000000; i++)
 			;
 
-		SMARTS.mutex.Acquire();
 		cout << "B";
-		cout << "B";
-		cout << "B";
-
-		SMARTS.mutex.Release();
 	}
 
-	SMARTS.mutex.Acquire();
 	cout << "\n *************   B Finish   *********************";
-
-	SMARTS.mutex.Release();
 }
 
 void c()
 {
-
+	char dummy;
+	event.wait(dummy);
 	SMARTS.mutex.Acquire();
 	cout << "\n *************   C Start    *********************";
 
-	SMARTS.mutex.Release();
 	for (int j = 0; j < printLoop; j++)
 	{
 		for (long i = 0; i < 60000; i++)
 			;
 
-		SMARTS.mutex.Acquire();
-		SMARTS.mutex.Acquire();
-
 		cout << "C";
-		cout << "C";
-		cout << "C";
-		SMARTS.mutex.Release();
-
-		SMARTS.mutex.Release();
 	}
-
-	SMARTS.mutex.Acquire();
 	cout << "\n *************   C Finish   *********************";
 
 	SMARTS.mutex.Release();
@@ -93,15 +70,12 @@ void c()
 void main()
 {
 	clrscr();
-	/*SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, EDF);
-	SMARTS.declareTask(a, 'A', 15, 4);
-	SMARTS.declareTask(b, 'B', 50, 3);
-	SMARTS.declareTask(c, 'C', 25, 4);*/
+	//event = Event();
 
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(a, 'A', 99, 3);											//402=not important. 400=most important
-	SMARTS.declareTask(b, 'B', 53, 3);
-	SMARTS.declareTask(c, 'C', 53, 3);
+	SMARTS.declareTask(a, 'A', 402, 3);											//402=not important. 400=most important
+	SMARTS.declareTask(b, 'B', 401, 3);
+	SMARTS.declareTask(c, 'C', 400, 3);
 
 	SMARTS.runTheTasks(); //
 	int x;
