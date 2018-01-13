@@ -5,6 +5,7 @@
 /* update  Tishrey   5777                                           */
 /* SMARTS77.H, main header file                                     */
 /********************************************************************/
+#define priority_inheritance 0
 
 #include <conio.h>
 #include <stdio.h>
@@ -27,8 +28,8 @@ enum taskStatus
 	SLEEP,
 	UNDEFINED,
 	FINISHED_ALL_CYCLES
-}; //@@@*
-class Mutex;////
+};			 //@@@*
+class Mutex; ////
 
 /**********    Classes    **********/
 class Event
@@ -91,10 +92,10 @@ class Mutex //@@ex2	(implemented with a Proirity Queue)
 	int owner;
 	int level;
 	//int* queue;
-	int *queue;			//2d array to save each task's {taskNum, Priority}
+	int *queue;			 //2d array to save each task's {taskNum, Priority}
 	void push(int task); //puts task into the queue. task consists of {taskNum, Priority}
-	int pop();			//gets the highest priority task
-	void fixQueue(int); //make all elements gathered together after "Get" function (so there wont be holes)
+	int pop();			 //gets the highest priority task
+	void fixQueue(int);  //make all elements gathered together after "Get" function (so there wont be holes)
   public:
 	void updateOwnerPriority();
 	Mutex();
@@ -128,6 +129,7 @@ class Parallelism
 	char errorTaskName;
 
   public:
+	void printTimePassed();
 	Mutex mutex;
 	Mutex *getWaitingForMutex(int taskNum);
 	void updateWaitingForMutex(int taskNum, Mutex *);
@@ -183,7 +185,7 @@ class Parallelism
 	void taskEnd();
 	void countdownTasks();					//@@@* countdown the time for each task to run
 	int getNextCycleCountdown(int taskNum); //@@@@@@ added helper func
-	int getCurrentPriority(int taskNum);			//@@ex2
+	int getCurrentPriority(int taskNum);	//@@ex2
 };
 
 //=======================

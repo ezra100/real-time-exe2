@@ -39,7 +39,7 @@ void b()
 	cout << "\n *************   B Start    *********************";
 	for (int j = 0; j < printLoop; j++)
 	{
-		for (long i = 0; i < 6000000; i++)
+		for (long i = 0; i < 600000; i++)
 			;
 
 		cout << "B";
@@ -53,6 +53,7 @@ void c()
 	char dummy;
 	event.wait(dummy);
 	SMARTS.mutex.Acquire();
+	SMARTS.printTimePassed();
 	cout << "\n *************   C Start    *********************";
 
 	for (int j = 0; j < printLoop; j++)

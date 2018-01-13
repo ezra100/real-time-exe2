@@ -131,6 +131,9 @@ int Parallelism::getIsThereCyclePassedError()
 {
 	return isThereCyclePassedError;
 }
+void Parallelism::printTimePassed(){
+	printf("\nTime: %d\n", timeFromStart);
+}
 
 void Parallelism::countdownTasks()
 { //@@@*
@@ -533,7 +536,9 @@ Mutex::Mutex() //@@ex2
 }
 void Mutex::updateOwnerPriority()
 {
-	if(!numberSuspended){
+#ifdef priority_inheritance
+	if (!numberSuspended)
+	{
 		return;
 	}
 	int priority = SMARTS.getCurrentPriority(queue[0]);
@@ -552,6 +557,7 @@ void Mutex::updateOwnerPriority()
 	{
 		mutex->updateOwnerPriority();
 	}
+#endif
 }
 void Mutex::Acquire()
 {
