@@ -11,61 +11,143 @@ const int printLoop = 15;
 const int ex2 = 1;
 // user Functions
 
+FILE *myOutput = fopen("test.txt",”w”);
+
+Mutex outputMutex;
+Mutex acMutex;
 Event event;
 Event bEvent;
 void a()
 {
-
-	SMARTS.mutex.Acquire();
+	acMutex.Acquire();
+	outputMutex.Acquire();
 	cout << "\n *************   A Start    *********************";
-	void *data = new int[0];
-	event.send('C', data, true);
-	bEvent.send('B', data, true);
+	outputMutex.Release();
+
 	for (int j = 0; j < printLoop; j++)
 	{
 		for (long i = 0; i < 60000; i++)
 			;
+		outputMutex.Acquire();
 		cout << "A";
+		outputMutex.Release();
 	}
+	outputMutex.Acquire();
+	cout << " a acquire ";
+	outputMutex.Release();
+	SMARTS.mutexa.Acquire;
+	for (int j = 0; j < printLoop; j++)
+	{
+		for (long i = 0; i < 60000; i++)
+			;
+		outputMutex.Acquire();
+		cout << "A";
+		outputMutex.Release();
+	}
+	cout << " a sends event to b and c ";
+	void *data = new int[0];
+	event.send('C', data, true);
+	bEvent.send('B', data, true);
 
+	for (int j = 0; j < printLoop; j++)
+	{
+		for (long i = 0; i < 60000; i++)
+			;
+		outputMutex.Acquire();
+		cout << "A";
+		outputMutex.Release();
+	}
+	outputMutex.Acquire();
+	cout << " A release";
+	outputMutex.Release();
+	acMutex.Release();
+	for (int j = 0; j < printLoop; j++)
+	{
+		for (long i = 0; i < 60000; i++)
+			;
+		outputMutex.Acquire();
+		cout << "A";
+		outputMutex.Release();
+	}
+	outputMutex.Acquire();
 	cout << "\n *************   A Finish   *********************";
-
-	SMARTS.mutex.Release();
+	outputMutex.Release();
 }
 
 void b()
 {
-	bEvent.wait(' ');
+	outputMutex.Acquire();
 	cout << "\n *************   B Start    *********************";
+	outputMutex.Release();
 	for (int j = 0; j < printLoop; j++)
 	{
 		for (long i = 0; i < 600000; i++)
 			;
-
+		outputMutex.Acquire();
 		cout << "B";
+		outputMutex.Release();
 	}
+	outputMutex.Acquire();
+	cout << " B waiting for event ";
+	outputMutex.Release();
+	bEvent.wait(' ');
 
+	for (int j = 0; j < printLoop; j++)
+	{
+		for (long i = 0; i < 600000; i++)
+			;
+		outputMutex.Acquire();
+		cout << "B";
+		outputMutex.Release();
+	}
+	outputMutex.Acquire();
 	cout << "\n *************   B Finish   *********************";
+	outputMutex.Release();
 }
 
 void c()
 {
+	outputMutex.Acquire();
+	cout << "\n *************   C Start    *********************";
+	outputMutex.Release();
+	for (int j = 0; j < printLoop; j++)
+	{
+		for (long i = 0; i < 60000; i++)
+			;
+		outputMutex.Acquire();
+		cout << "C";
+		outputMutex.Release();
+	}
+	outputMutex.Acquire();
+	cout << "C waiting for event from A ";
+	outputMutex.Release();
 	char dummy;
 	event.wait(dummy);
-	SMARTS.mutex.Acquire();
+
+	outputMutex.Acquire();
+	cout << "C acquiring ac mutex ";
+	outputMutex.Release();
+	acMutex.Acquire();
+
+	outputMutex.Acquire();
 	SMARTS.printTimePassed();
-	cout << "\n *************   C Start    *********************";
+	outputMutex.Release();
 
 	for (int j = 0; j < printLoop; j++)
 	{
 		for (long i = 0; i < 60000; i++)
 			;
-
+		outputMutex.Acquire();
 		cout << "C";
+		outputMutex.Release();
 	}
+	outputMutex.Acquire();
+	cout << "C releasing ac mutex ";
+	outputMutex.Release();
+	acMutex.Release();
+	outputMutex.Acquire();
 	cout << "\n *************   C Finish   *********************";
-
-	SMARTS.mutex.Release();
+	outputMutex.Release();
 }
 
 void main()
@@ -74,9 +156,9 @@ void main()
 	//event = Event();
 
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(a, 'A', 402, 3);											//402=not important. 400=most important
-	SMARTS.declareTask(b, 'B', 401, 3);
-	SMARTS.declareTask(c, 'C', 400, 3);
+	SMARTS.declareTask(a, 'A', 402, 1);											//402=not important. 400=most important
+	SMARTS.declareTask(b, 'B', 401, 1);
+	SMARTS.declareTask(c, 'C', 400, 1);
 
 	SMARTS.runTheTasks(); //
 	int x;

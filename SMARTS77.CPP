@@ -132,7 +132,7 @@ int Parallelism::getIsThereCyclePassedError()
 	return isThereCyclePassedError;
 }
 void Parallelism::printTimePassed(){
-	printf("\nTime: %d\n", timeFromStart);
+	printf("\nTime: %d sec/18\n", timeFromStart);
 }
 
 void Parallelism::countdownTasks()

@@ -130,7 +130,6 @@ class Parallelism
 
   public:
 	void printTimePassed();
-	Mutex mutex;
 	Mutex *getWaitingForMutex(int taskNum);
 	void updateWaitingForMutex(int taskNum, Mutex *);
 	int getIsThereCyclePassedError();
