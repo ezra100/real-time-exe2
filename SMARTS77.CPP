@@ -134,6 +134,9 @@ int Parallelism::getIsThereCyclePassedError()
 void Parallelism::printTimePassed(){
 	printf("\nTime: %d sec/18\n", timeFromStart);
 }
+int Parallelism::getTimePassed(){
+	return timeFromStart;
+}
 
 void Parallelism::countdownTasks()
 { //@@@*

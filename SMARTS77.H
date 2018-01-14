@@ -129,6 +129,7 @@ class Parallelism
 	char errorTaskName;
 
   public:
+	int getTimePassed();
 	void printTimePassed();
 	Mutex *getWaitingForMutex(int taskNum);
 	void updateWaitingForMutex(int taskNum, Mutex *);
