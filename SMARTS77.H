@@ -20,6 +20,7 @@
 #define userInt 0x60
 #define MaxTask 15
 #define MaxStack 512
+const int MAX_MUTEXES = 7;
 enum taskStatus
 {
 	READY,
@@ -58,8 +59,12 @@ class Task
 {
 	void far *code;
 	void far *userTaskEnd;
+	Mutex *ownedMutexes [MAX_MUTEXES];
+	int ownedMutexesSize;
 
   public:
+	void addOwnedMutex(Mutex *);
+	void removeOwnedMutex(Mutex *); //this also updates the owner's priority
 	void reDeclare();
 	int cyclesNum;			//@@@@@@ cycles num (ex1)
 	int cycleTime;			//@@@@@@ cycles time (ex1)
@@ -127,8 +132,11 @@ class Parallelism
 	void cyclePassedError(char);
 	int cyclesRemainingTasks;
 	char errorTaskName;
+	//array of mutexes owned by this task
 
   public:
+	void addOwnedMutex(int i, Mutex *);
+	void removeOwnedMutex(int i, Mutex *); //this also updates the owner's priority
 	int getTimePassed();
 	void printTimePassed();
 	Mutex *getWaitingForMutex(int taskNum);

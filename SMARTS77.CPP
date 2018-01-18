@@ -131,11 +131,21 @@ int Parallelism::getIsThereCyclePassedError()
 {
 	return isThereCyclePassedError;
 }
-void Parallelism::printTimePassed(){
+void Parallelism::printTimePassed()
+{
 	printf("\nTime: %d sec/18\n", timeFromStart);
 }
-int Parallelism::getTimePassed(){
+int Parallelism::getTimePassed()
+{
 	return timeFromStart;
+}
+void Parallelism::addOwnedMutex(int i, Mutex *mutex)
+{
+	context[i].addOwnedMutex(mutex);
+}
+void Parallelism::removeOwnedMutex(int i, Mutex *mutex)
+{
+	context[i].removeOwnedMutex(mutex);
 }
 
 void Parallelism::countdownTasks()
@@ -453,6 +463,7 @@ Task::Task()
 	sleepCount = 0;
 	waitingFor = NULL;
 	currentPriority = originalPriority = 0;
+	ownedMutexesSize = 0;
 }
 //-----------------------------------------------------
 void Task::declare(void far *code, void far *userTaskEnd, char name, int cycleTime, int cyclesNum) //@@@@@@ ADDED 2 ARGS (LAST 2)
@@ -524,6 +535,41 @@ int Task::getOriginalPriority()
 {
 	return originalPriority;
 }
+
+void Task::addOwnedMutex(Mutex *mutex)
+{
+	if (ownedMutexesSize >= MAX_MUTEXES)
+	{
+		printf("ERROR, owned mutexes array is full");
+		return;
+	}
+	ownedMutexes[ownedMutexesSize] = mutex;
+	ownedMutexesSize++;
+}
+
+void Task::removeOwnedMutex(Mutex *mutex)
+{
+	int index = -1;
+	for (int i = 0; i < ownedMutexesSize; i++)
+	{
+		if (ownedMutexes[i] == mutex)
+		{
+			index = i;
+			break;
+		}
+	}
+	if (index < 0)
+	{
+		printf("ERROR, owned mutex not found");
+		return;
+	}
+	ownedMutexesSize--;
+	ownedMutexes[index] = ownedMutexes[ownedMutexesSize];
+	for (i = 0; i < ownedMutexesSize; i++)
+	{
+		ownedMutexes[i]->updateOwnerPriority();
+	}
+}
 #pragma endregion
 
 #pragma region Mutex
@@ -592,6 +638,7 @@ void Mutex::Acquire()
 	}
 	owner = SMARTS.getCurrentTask();
 	level++;
+	SMARTS.addOwnedMutex(owner, this);
 	SMARTS.contextSwitchOn();
 }
 void Mutex::Release()
@@ -606,14 +653,18 @@ void Mutex::Release()
 		}
 		else
 		{
+			SMARTS.setTasklToOriginalPriority(owner);
+			SMARTS.removeOwnedMutex(owner, this);
+			//debug
+			//printf("%c:%d", SMARTS.getName(owner), SMARTS.getCurrentPriority(owner));
+
 			if (numberSuspended > 0)
 			{
 				//get a task from queue (with highest priority)
 				int task = pop();
 				//debug
 				//printf("waking %d ", task);
-				//SMARTS.setCurrentTask();
-				SMARTS.setTasklToOriginalPriority(owner);
+
 				// todo - make sure that if there's another mutex waiting for the owner
 				// the owner's priority will be updated by that mutex
 				owner = task;

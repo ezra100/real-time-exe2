@@ -12,13 +12,9 @@ const int emptyLoop = 6000;
 const int printLoopSize = 15;
 const int ex2 = 1;
 // user Functions
-
 FILE *myOutput;
-
-Mutex outputMutex;
-Mutex acMutex, dfMutex;
-Event cEvent, bEvent, eEvent, fEvent;
-
+Mutex outputMutex, acMutex, dfMutex, abMutex, bcMutex, cdMutex, deMutex;
+Event cEvent, bEvent, eEvent, fEvent, dEvent;
 int lastMdTask = -1;
 void mdLog(const char _FAR *msg, int newLine = true)
 {
@@ -32,14 +28,12 @@ void mdLog(const char _FAR *msg, int newLine = true)
 			fprintf(myOutput, "|");
 		}
 	}
-	fprintf(myOutput,"%s" ,msg);
+	fprintf(myOutput, "%s", msg);
 	lastMdTask = currentTask;
 	outputMutex.Release();
 }
-
 void printLoop(char name)
 {
-
 	char buffer[5];
 	sprintf(buffer, "%c", name);
 	for (int j = 0; j < printLoopSize; j++)
@@ -49,163 +43,205 @@ void printLoop(char name)
 		mdLog(buffer, false);
 	}
 }
-
+#pragma region tasks
 void a()
 {
-	outputMutex.Acquire();
 	mdLog("`A` Start ");
-	outputMutex.Release();
 	printLoop('A');
-	outputMutex.Acquire();
 	mdLog("`A` acquireing 'AC mutex' ");
-	outputMutex.Release();
 	acMutex.Acquire();
 	printLoop('A');
-	outputMutex.Acquire();
-	mdLog("`A` sends Event to `B` and `C` ");
-	outputMutex.Release();
+	mdLog("`A` sends Event to `B`, `C` and `D` ");
 	void *data = new int[0];
 	cEvent.send('C', data, true);
 	bEvent.send('B', data, true);
-
+	dEvent.send('D', data, true);
 	printLoop('A');
-
-	outputMutex.Acquire();
 	mdLog("`A` releaseing `AC mutex` ");
-	outputMutex.Release();
 	acMutex.Release();
 	printLoop('A');
-	outputMutex.Acquire();
 	mdLog("`A` Finish ");
-	outputMutex.Release();
 }
-
 void b()
 {
-	outputMutex.Acquire();
 	mdLog("`B` Start    ");
-	outputMutex.Release();
 	printLoop('B');
-
-	outputMutex.Acquire();
 	mdLog("`B` waiting for Event from `A` ");
-	outputMutex.Release();
 	char dummy;
 	bEvent.wait(dummy);
 	printLoop('B');
-	outputMutex.Acquire();
 	mdLog("`B` Finish ");
-	outputMutex.Release();
 }
-
 void c()
 {
-	outputMutex.Acquire();
 	mdLog("`C` Start   ");
-	outputMutex.Release();
 	printLoop('C');
-
-	outputMutex.Acquire();
 	mdLog("`C` waiting for Event from `A` ");
-	outputMutex.Release();
 	char dummy;
 	cEvent.wait(dummy);
 	printLoop('C');
-	outputMutex.Acquire();
 	mdLog(" `C` acquiring `ac mutex` ");
-	outputMutex.Release();
-
 	acMutex.Acquire();
-
 	printLoop('C');
-
-	outputMutex.Acquire();
 	mdLog(" `C` releasing `ac mutex` ");
-	outputMutex.Release();
 	acMutex.Release();
-	outputMutex.Acquire();
 	mdLog("`C` Finish  ");
-	outputMutex.Release();
 }
 void d()
 {
-	outputMutex.Acquire();
 	mdLog("`D` Start ");
-	outputMutex.Release();
 	printLoop('D');
-	outputMutex.Acquire();
+	mdLog("`D` waiting for event from `A` ");
+	dEvent.wait(' ');
+	printLoop('D');
 	mdLog("`D` acquireing 'df mutex' ");
-	outputMutex.Release();
 	dfMutex.Acquire();
 	printLoop('D');
-	outputMutex.Acquire();
 	mdLog("`D` sends Event to `E` and `F` ");
-	outputMutex.Release();
 	void *data = new int[0];
 	fEvent.send('F', data, true);
 	eEvent.send('E', data, true);
-
 	printLoop('D');
-
-	outputMutex.Acquire();
 	mdLog("`D` releaseing `df mutex` ");
-	outputMutex.Release();
 	dfMutex.Release();
 	printLoop('D');
-	outputMutex.Acquire();
 	mdLog("`D` Finish ");
-	outputMutex.Release();
 }
-
 void e()
 {
-	outputMutex.Acquire();
 	mdLog("`E` Start    ");
-	outputMutex.Release();
 	printLoop('E');
-
-	outputMutex.Acquire();
 	mdLog("`E` waiting for Event from `D` ");
-	outputMutex.Release();
 	char dummy;
 	eEvent.wait(dummy);
 	printLoop('E');
-	outputMutex.Acquire();
 	mdLog("`E` Finish ");
-	outputMutex.Release();
 }
-
 void f()
 {
-	outputMutex.Acquire();
 	mdLog("`F` Start   ");
-	outputMutex.Release();
 	printLoop('F');
-
-	outputMutex.Acquire();
 	mdLog(" `F` waiting for Event from `D` ");
-	outputMutex.Release();
 	char dummy;
 	fEvent.wait(dummy);
 	printLoop('F');
-	outputMutex.Acquire();
 	mdLog(" `F` acquiring `df mutex` ");
-	outputMutex.Release();
-
 	dfMutex.Acquire();
-
-
-
 	printLoop('F');
-
-	outputMutex.Acquire();
 	mdLog(" `F` releasing `df mutex` ");
-	outputMutex.Release();
 	dfMutex.Release();
-	outputMutex.Acquire();
 	mdLog("`F` Finish  ");
-	outputMutex.Release();
 }
+#pragma endregion
+#pragma region recursiveTasks
+void ra()
+{
+	mdLog("`A` Start ");
+	printLoop('A');
+	mdLog("`A` acquireing 'AB mutex' ");
+	abMutex.Acquire();
+	printLoop('A');
+	mdLog("`A` sends Event to `B` ");
+	void *data = new int[0];
+	bEvent.send('B', data, true);
+	printLoop('A');
+	mdLog("`A` releaseing `AB mutex` ");
+	abMutex.Release();
+	printLoop('A');
+	mdLog("`A` Finish ");
+}
+void rb()
+{
+	mdLog("`B` Start ");
+	printLoop('B');
+	mdLog("`B` waiting for Event from `A` ");
+	char dummy;
+	bEvent.wait(dummy);
+	mdLog("`B` acquireing 'BC mutex' ");
+	bcMutex.Acquire();
+	printLoop('B');
+	mdLog("`B` sends Event to `C` ");
+	void *data = new int[0];
+	cEvent.send('C', data, true);
+	printLoop('B');
+	mdLog("`B` acquireing 'AB mutex' ");
+	abMutex.Acquire();
+	printLoop('B');
+	mdLog("`B` releaseing `AB mutex` ");
+	abMutex.Release();
+	printLoop('B');
+	mdLog("`B` releaseing `BC mutex` ");
+	bcMutex.Release();
+	printLoop('B');
+	mdLog("`B` Finish ");
+}
+void rc()
+{
+	mdLog("`C` Start ");
+	printLoop('C');
+	mdLog("`C` waiting for Event from `B` ");
+	char dummy;
+	cEvent.wait(dummy);
+	mdLog("`C` acquireing 'CD mutex' ");
+	cdMutex.Acquire();
+	printLoop('C');
+	mdLog("`C` sends Event to `C` ");
+	void *data = new int[0];
+	dEvent.send('D', data, true);
+	printLoop('C');
+	mdLog("`C` acquireing 'BC mutex' ");
+	bcMutex.Acquire();
+	printLoop('C');
+	mdLog("`C` releaseing `BC mutex` ");
+	bcMutex.Release();
+	printLoop('C');
+	mdLog("`C` releaseing `CD mutex` ");
+	cdMutex.Release();
+	printLoop('C');
+	mdLog("`C` Finish ");
+}
+void rd()
+{
+	mdLog("`D` Start ");
+	printLoop('D');
+	mdLog("`D` waiting for Event from `C` ");
+	char dummy;
+	dEvent.wait(dummy);
+	mdLog("`D` acquireing 'DE mutex' ");
+	deMutex.Acquire();
+	printLoop('D');
+	mdLog("`D` sends Event to `E` ");
+	void *data = new int[0];
+	eEvent.send('E', data, true);
+	printLoop('D');
+	mdLog("`D` acquireing 'CD mutex' ");
+	cdMutex.Acquire();
+	printLoop('D');
+	mdLog("`D` releaseing `CD mutex` ");
+	cdMutex.Release();
+	printLoop('D');
+	mdLog("`D` releaseing `DE mutex` ");
+	deMutex.Release();
+	printLoop('D');
+	mdLog("`D` Finish ");
+}
+void re()
+{
+	mdLog("`E` Start ");
+	printLoop('E');
+	mdLog("`E` waiting for Event from `D` ");
+	char dummy;
+	eEvent.wait(dummy);
+	printLoop('E');
+	mdLog("`E` acquireing 'DE mutex' ");
+	deMutex.Acquire();
+	printLoop('E');
+	mdLog("`E` releaseing `DE mutex` ");
+	deMutex.Release();
+	printLoop('E');
+	mdLog("`E` Finish ");
+}
+#pragma endregion
 
 void main()
 {
@@ -219,13 +255,11 @@ void main()
 #endif
 	fprintf(myOutput, "TIME | A | B | C | D |E|F\n:--- | :---: | :---: | :---: | :---: | :---: | :---: |");
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(a, 'A', 402, 1);											//402=not important. 400=most important
-	SMARTS.declareTask(b, 'B', 401, 1);
-	SMARTS.declareTask(c, 'C', 400, 1);
-	SMARTS.declareTask(d, 'D', 402, 1); //402=not important. 400=most important
-	SMARTS.declareTask(e, 'E', 401, 1);
-	SMARTS.declareTask(f, 'F', 400, 1);
-
+	SMARTS.declareTask(ra, 'A', 406, 1);
+	SMARTS.declareTask(rb, 'B', 405, 1);
+	SMARTS.declareTask(rc, 'C', 404, 1);
+	SMARTS.declareTask(rd, 'D', 403, 1);
+	SMARTS.declareTask(re, 'E', 402, 1);
 	SMARTS.runTheTasks(); //
 	fclose(myOutput);
 	printf("Finished");
