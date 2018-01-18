@@ -32,7 +32,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 			fprintf(myOutput, "|");
 		}
 	}
-	fprintf(myOutput, msg);
+	fprintf(myOutput,"%s" ,msg);
 	lastMdTask = currentTask;
 	outputMutex.Release();
 }
@@ -117,10 +117,6 @@ void c()
 
 	acMutex.Acquire();
 
-	outputMutex.Acquire();
-	mdLog(" Time: `%d` ", SMARTS.getTimePassed());
-	outputMutex.Release();
-
 	printLoop('C');
 
 	outputMutex.Acquire();
@@ -198,9 +194,7 @@ void f()
 
 	dfMutex.Acquire();
 
-	outputMutex.Acquire();
-	mdLog(" Time: `%d` ", SMARTS.getTimePassed());
-	outputMutex.Release();
+
 
 	printLoop('F');
 
@@ -223,7 +217,7 @@ void main()
 	myOutput = fopen("no inheritance.md", "w");
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
-	fprintf(myOutput, "time | A | B | C | D |E|F\n--- | --- | --- | --- | --- | --- | --- |");
+	fprintf(myOutput, "TIME | A | B | C | D |E|F\n--- | --- | --- | --- | --- | --- | --- |");
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
 	SMARTS.declareTask(a, 'A', 402, 1);											//402=not important. 400=most important
 	SMARTS.declareTask(b, 'B', 401, 1);
