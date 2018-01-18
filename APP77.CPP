@@ -46,7 +46,9 @@ void a()
 	outputMutex.Release();
 	acMutex.Acquire();
 	printLoop('A');
+	outputMutex.Acquire();
 	fprintf(myOutput, "\n\n##### `A` sends event to `B` and `C` ");
+	outputMutex.Release();
 	void *data = new int[0];
 	event.send('C', data, true);
 	bEvent.send('B', data, true);
@@ -97,6 +99,7 @@ void c()
 	outputMutex.Acquire();
 	fprintf(myOutput, "\n\n `C` acquiring `ac mutex` ");
 	outputMutex.Release();
+
 	acMutex.Acquire();
 
 	outputMutex.Acquire();
@@ -113,13 +116,94 @@ void c()
 	fprintf(myOutput, "\n\n##   `C` Finish  ");
 	outputMutex.Release();
 }
+void d()
+{
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n## `D` Start ");
+	outputMutex.Release();
+	printLoop('D');
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n#### `D` acquireing 'AC mutex' ");
+	outputMutex.Release();
+	acMutex.Acquire();
+	printLoop('D');
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##### `D` sends event to `E` and `F` ");
+	outputMutex.Release();
+	void *data = new int[0];
+	event.send('F', data, true);
+	bEvent.send('E', data, true);
+
+	printLoop('D');
+
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n#### `D` releaseing `AC mutex` ");
+	outputMutex.Release();
+	acMutex.Release();
+	printLoop('D');
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##   `D` Finish ");
+	outputMutex.Release();
+}
+
+void e()
+{
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##   `E` Start    ");
+	outputMutex.Release();
+	printLoop('E');
+
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n#### `E` waiting for event ");
+	outputMutex.Release();
+	char dummy;
+	bEvent.wait(dummy);
+	printLoop('E');
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##   `E` Finish ");
+	outputMutex.Release();
+}
+
+void f()
+{
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##   `F` Start   ");
+	outputMutex.Release();
+	printLoop('F');
+
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n F waiting for event from `E` ");
+	outputMutex.Release();
+	char dummy;
+	event.wait(dummy);
+	printLoop('F');
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n `F` acquiring `ac mutex` ");
+	outputMutex.Release();
+	
+	acMutex.Acquire();
+
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n Time: `%d` ", SMARTS.getTimePassed());
+	outputMutex.Release();
+
+	printLoop('F');
+
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n `F` releasing `ac mutex` ");
+	outputMutex.Release();
+	acMutex.Release();
+	outputMutex.Acquire();
+	fprintf(myOutput, "\n\n##   `F` Finish  ");
+	outputMutex.Release();
+}
 
 void main()
 {
 	clrscr();
 //event = Event();
 #ifdef priority_inheritance
-	myOutput = fopen("with inheritance.md", "w");
+	myOutput = fopen("inheritance.md", "w");
 #else
 	myOutput = fopen("no inheritance.mdf", "w");
 #endif
