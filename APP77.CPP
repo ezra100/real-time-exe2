@@ -217,7 +217,7 @@ void main()
 	myOutput = fopen("no inheritance.md", "w");
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
-	fprintf(myOutput, "TIME | A | B | C | D |E|F\n--- | --- | --- | --- | --- | --- | --- |");
+	fprintf(myOutput, "TIME | A | B | C | D |E|F\n:--- | :---: | :---: | :---: | :---: | :---: | :---: |");
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
 	SMARTS.declareTask(a, 'A', 402, 1);											//402=not important. 400=most important
 	SMARTS.declareTask(b, 'B', 401, 1);
