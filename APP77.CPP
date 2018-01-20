@@ -32,6 +32,19 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	lastMdTask = currentTask;
 	outputMutex.Release();
 }
+void initMdLog()
+{
+	fprintf(myOutput, "TIME |");
+	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
+	{
+		fprintf(myOutput, " %c |", SMARTS.getName(i));
+	}
+	fprintf(myOutput, "\n:--- |");
+	for (i = 0; i < SMARTS.getTotalTasks(); i++)
+	{
+		fprintf(myOutput, " :---: |");
+	}
+}
 void printLoop(char name)
 {
 	char buffer[5];
@@ -253,13 +266,13 @@ void main()
 	myOutput = fopen("no inheritance.md", "w");
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
-	fprintf(myOutput, "TIME | A | B | C | D |E|F\n:--- | :---: | :---: | :---: | :---: | :---: | :---: |");
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
 	SMARTS.declareTask(ra, 'A', 406, 1);
 	SMARTS.declareTask(rb, 'B', 405, 1);
 	SMARTS.declareTask(rc, 'C', 404, 1);
 	SMARTS.declareTask(rd, 'D', 403, 1);
 	SMARTS.declareTask(re, 'E', 402, 1);
+	initMdLog();
 	SMARTS.runTheTasks(); //
 	fclose(myOutput);
 	printf("Finished");
