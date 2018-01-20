@@ -44,15 +44,11 @@ int EDF() //@@@@@@ (ex1)
 
 int RMS() //@@ex2
 {
-	int i = 0;
-	for (i; SMARTS.getStatus(i) != READY && i < SMARTS.getTotalTasks(); i++) //go to first READY task.
-		if (i == SMARTS.getTotalTasks())
-			return i;									//no task is READY, call scheduler
-	int highestPriority = SMARTS.getCurrentPriority(i); //high (first to occur) is actually low number in code
-	int highestPriorityTask = i;
-	for (i += 1; i < SMARTS.getTotalTasks(); i++)
+	int highestPriority =MAXINT;
+	int highestPriorityTask =  SMARTS.getTotalTasks();
+	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
 	{
-		//printf(" %c:%d,%d; ", SMARTS.getName(i), SMARTS.getStatus(i), SMARTS.getCurrentPriority(i));
+		//debug
 
 		if (SMARTS.getStatus(i) == READY && SMARTS.getCurrentPriority(i) < highestPriority)
 		{
