@@ -678,6 +678,7 @@ void Mutex::Release()
 	}
 
 	SMARTS.contextSwitchOn();
+	SMARTS.callScheduler();
 }
 void Mutex::push(int item) //puts task into the queue
 {
