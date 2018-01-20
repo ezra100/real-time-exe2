@@ -34,7 +34,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 }
 void initMdLog()
 {
-	outputMutex.Acquire();
+	//outputMutex.Acquire();
 	fprintf(myOutput, "TIME |");
 	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
 	{
@@ -45,7 +45,7 @@ void initMdLog()
 	{
 		fprintf(myOutput, " :---: |");
 	}
-	outputMutex.Release();
+	//outputMutex.Release();
 }
 void printLoop(char name)
 {
