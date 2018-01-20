@@ -25,7 +25,7 @@ void far interrupt timerInterruptHandler(...)
 	// it calls the original BIOS routine. not to change the PC work.
 	int progInt = SMARTS.getProgInt();
 	//debug
-	printf("ti:%d", progInt);
+	//printf("ti:%d", progInt);
 	if (!progInt)
 	{
 		asm	int userInt;

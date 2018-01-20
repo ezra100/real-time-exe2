@@ -277,11 +277,11 @@ void main()
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(ra, 'A', 206, 1);
-	SMARTS.declareTask(rb, 'B', 205, 1);
-	SMARTS.declareTask(rc, 'C', 204, 1);
-	SMARTS.declareTask(rd, 'D', 203, 1);
-	SMARTS.declareTask(re, 'E', 202, 1);
+	SMARTS.declareTask(ra, 'A', 406, 1);
+	SMARTS.declareTask(rb, 'B', 405, 1);
+	SMARTS.declareTask(rc, 'C', 404, 1);
+	SMARTS.declareTask(rd, 'D', 403, 1);
+	SMARTS.declareTask(re, 'E', 402, 1);
 
 	// SMARTS.declareTask(a, 'A', 206, 1);
 	// SMARTS.declareTask(b, 'B', 204, 1);
