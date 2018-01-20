@@ -22,8 +22,15 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	int currentTask = SMARTS.getCurrentTask();
 	if (newLine || lastMdTask != currentTask)
 	{
+		int i;
+		//debug
+		// fprintf(myOutput, "\n%d | ", SMARTS.getTimePassed());
+		// for (int i = 0; i < SMARTS.getTotalTasks(); i++)
+		// {
+		// 	fprintf(myOutput, "%c:%d,%d |", SMARTS.getName(i), SMARTS.getStatus(i), SMARTS.getCurrentPriority(i));
+		// }
 		fprintf(myOutput, "\n%d | ", SMARTS.getTimePassed());
-		for (int i = 0; i < currentTask; i++)
+		for ( i = 0; i < currentTask; i++)
 		{
 			fprintf(myOutput, "|");
 		}
@@ -70,9 +77,9 @@ void a()
 	printLoop('A');
 	mdLog("A sends Event to D ");
 	void *data = new int[0];
-	dEvent.send('D', data, true);
+	dEvent.send('D', data, false);
 	printLoop('A');
-	mdLog("A releaseing AC mutex ");
+	mdLog("A releasing AC mutex ");
 	acMutex.Release();
 	printLoop('A');
 	mdLog("A Finish ");
@@ -97,8 +104,8 @@ void c()
 	printLoop('C');
 	mdLog("Sending event to F and B");
 	void *data;
-	bEvent.send('B', data, true);
-	fEvent.send('F', data, true);
+	bEvent.send('B', data, false);
+	fEvent.send('F', data, false);
 	printLoop('C');
 	mdLog(" C acquiring ac mutex ");
 	acMutex.Acquire();
@@ -120,9 +127,9 @@ void d()
 	printLoop('D');
 	mdLog("sending event to C");
 	void *data;
-	cEvent.send('C', data, true);
+	cEvent.send('C', data, false);
 	printLoop('D');
-	mdLog("D releaseing df mutex ");
+	mdLog("D releasing df mutex ");
 	dfMutex.Release();
 	printLoop('D');
 	mdLog("D Finish ");
@@ -148,7 +155,7 @@ void f()
 	printLoop('F');
 	mdLog("Sending event to E");
 	int *data;
-	eEvent.send('E', data, true);
+	eEvent.send('E', data, false);
 	printLoop('F');
 	mdLog(" F acquiring df mutex ");
 	dfMutex.Acquire();
@@ -168,9 +175,9 @@ void ra()
 	printLoop('A');
 	mdLog("A sends Event to B ");
 	void *data;
-	bEvent.send('B', data, true);
+	bEvent.send('B', data, false);
 	printLoop('A');
-	mdLog("A releaseing AB mutex ");
+	mdLog("A releasing AB mutex ");
 	abMutex.Release();
 	printLoop('A');
 	mdLog("A Finish ");
@@ -187,15 +194,15 @@ void rb()
 	printLoop('B');
 	mdLog("B sends Event to C ");
 	void *data;
-	cEvent.send('C', data, true);
+	cEvent.send('C', data, false);
 	printLoop('B');
 	mdLog("B acquireing 'AB mutex' ");
 	abMutex.Acquire();
 	printLoop('B');
-	mdLog("B releaseing AB mutex ");
+	mdLog("B releasing AB mutex ");
 	abMutex.Release();
 	printLoop('B');
-	mdLog("B releaseing BC mutex ");
+	mdLog("B releasing BC mutex ");
 	bcMutex.Release();
 	printLoop('B');
 	mdLog("B Finish ");
@@ -210,16 +217,17 @@ void rc()
 	mdLog("C acquireing 'CD mutex' ");
 	cdMutex.Acquire();
 	printLoop('C');
-	mdLog("`C` sends Event to `D` ");	void *data;
-	dEvent.send('D', data, true);
+	mdLog("`C` sends Event to `D` ");
+	void *data;
+	dEvent.send('D', data, false);
 	printLoop('C');
 	mdLog("C acquireing 'BC mutex' ");
 	bcMutex.Acquire();
 	printLoop('C');
-	mdLog("C releaseing BC mutex ");
+	mdLog("C releasing BC mutex ");
 	bcMutex.Release();
 	printLoop('C');
-	mdLog("C releaseing CD mutex ");
+	mdLog("C releasing CD mutex ");
 	cdMutex.Release();
 	printLoop('C');
 	mdLog("C Finish ");
@@ -236,15 +244,15 @@ void rd()
 	printLoop('D');
 	mdLog("D sends Event to E ");
 	void *data;
-	eEvent.send('E', data, true);
+	eEvent.send('E', data, false);
 	printLoop('D');
 	mdLog("D acquireing 'CD mutex' ");
 	cdMutex.Acquire();
 	printLoop('D');
-	mdLog("D releaseing CD mutex ");
+	mdLog("D releasing CD mutex ");
 	cdMutex.Release();
 	printLoop('D');
-	mdLog("D releaseing DE mutex ");
+	mdLog("D releasing DE mutex ");
 	deMutex.Release();
 	printLoop('D');
 	mdLog("D Finish ");
@@ -260,13 +268,13 @@ void re()
 
 	mdLog("E sending events to 1,2,3 ");
 	void *data;
-	event1.send('1',data,true);
-	event2.send('2',data,true);
-	event3.send('3',data,true);
+	event1.send('1', data, false);
+	event2.send('2', data, false);
+	event3.send('3', data, false);
 	mdLog("`E` acquireing `DE mutex` ");
 	deMutex.Acquire();
 	printLoop('E');
-	mdLog("E releaseing DE mutex ");
+	mdLog("E releasing DE mutex ");
 	deMutex.Release();
 	printLoop('E');
 	mdLog("E Finish ");
@@ -327,16 +335,16 @@ void main()
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
 
-	int zero=400;
-	int times=1;
-	SMARTS.declareTask(ra, 'A', zero+9, times);
-	SMARTS.declareTask(r1, '1', zero+8, times); //not using mutexes
-	SMARTS.declareTask(rb, 'B', zero+7, times);
-	SMARTS.declareTask(r2, '2', zero+6, times); //not using mutexes
-	SMARTS.declareTask(rc, 'C', zero+5, times);
-	SMARTS.declareTask(r3, '3', zero+4, times); //not using mutexes
-	SMARTS.declareTask(rd, 'D', zero+3, times);
-	SMARTS.declareTask(re, 'E', zero+2, times);
+	int zero = 400;
+	int times = 1;
+	SMARTS.declareTask(ra, 'A', zero + 9, times);
+	SMARTS.declareTask(r1, '1', zero + 8, times); //not using mutexes
+	SMARTS.declareTask(rb, 'B', zero + 7, times);
+	SMARTS.declareTask(r2, '2', zero + 6, times); //not using mutexes
+	SMARTS.declareTask(rc, 'C', zero + 5, times);
+	SMARTS.declareTask(r3, '3', zero + 4, times); //not using mutexes
+	SMARTS.declareTask(rd, 'D', zero + 3, times);
+	SMARTS.declareTask(re, 'E', zero + 2, times);
 
 	// SMARTS.declareTask(a, 'A', 206, 1);
 	// SMARTS.declareTask(b, 'B', 204, 1);

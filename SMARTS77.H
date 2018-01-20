@@ -20,7 +20,7 @@
 #define userInt 0x60
 #define MaxTask 15
 #define MaxStack 512
-const int MAX_MUTEXES = 7;
+const int MAX_MUTEXES = 10;
 enum taskStatus
 {
 	READY,
