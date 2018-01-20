@@ -14,7 +14,7 @@ const int ex2 = 1;
 // user Functions
 FILE *myOutput;
 Mutex outputMutex, acMutex, dfMutex, abMutex, bcMutex, cdMutex, deMutex;
-Event cEvent, bEvent, eEvent, fEvent, dEvent;
+Event cEvent, bEvent, eEvent, fEvent, dEvent, event1, event2, event3;
 int lastMdTask = -1;
 void mdLog(const char _FAR *msg, int newLine = true)
 {
@@ -210,7 +210,11 @@ void rc()
 	mdLog("C acquireing 'CD mutex' ");
 	cdMutex.Acquire();
 	printLoop('C');
+<<<<<<< HEAD
 	mdLog("C sends Event to C ");
+=======
+	mdLog("`C` sends Event to `D` ");
+>>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
 	void *data;
 	dEvent.send('D', data, true);
 	printLoop('C');
@@ -258,13 +262,63 @@ void re()
 	char dummy;
 	eEvent.wait(dummy);
 	printLoop('E');
+<<<<<<< HEAD
 	mdLog("E acquireing 'DE mutex' ");
+=======
+	void *data;
+	event1.send('1',data,true);
+	event2.send('2',data,true);
+	event3.send('3',data,true);
+	mdLog("`E` acquireing `DE mutex` ");
+>>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
 	deMutex.Acquire();
 	printLoop('E');
 	mdLog("E releaseing DE mutex ");
 	deMutex.Release();
 	printLoop('E');
 	mdLog("E Finish ");
+}
+void r1()
+{
+	mdLog("`1` Start ");
+	mdLog("`1` waiting for Event from `E` ");
+	char dummy;
+	event1.wait(dummy);
+	printLoop('1');
+	printLoop('1');
+	/*printLoop('1');
+	printLoop('1');
+	printLoop('1');
+	printLoop('1');*/
+	mdLog("`1` Finish ");
+}
+void r2()
+{
+	mdLog("`2` Start ");
+	mdLog("`2` waiting for Event from `E` ");
+	char dummy;
+	event2.wait(dummy);
+	printLoop('2');
+	printLoop('2');
+	/*printLoop('2');
+	printLoop('2');
+	printLoop('2');
+	printLoop('2');*/
+	mdLog("`2` Finish ");
+}
+void r3()
+{
+	mdLog("`3` Start ");
+	mdLog("`3` waiting for Event from `E` ");
+	char dummy;
+	event3.wait(dummy);
+	printLoop('3');
+	printLoop('3');
+	/*printLoop('3');
+	printLoop('3');
+	printLoop('3');
+	printLoop('3');*/
+	mdLog("`3` Finish ");
 }
 #pragma endregion
 
@@ -279,11 +333,24 @@ void main()
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
+<<<<<<< HEAD
 	SMARTS.declareTask(ra, 'A', 206, 5);
 	SMARTS.declareTask(rb, 'B', 205, 5);
 	SMARTS.declareTask(rc, 'C', 204, 5);
 	SMARTS.declareTask(rd, 'D', 203, 5);
 	SMARTS.declareTask(re, 'E', 202, 5);
+=======
+	int zero=400;
+	int times=1;
+	SMARTS.declareTask(ra, 'A', zero+9, times);
+	SMARTS.declareTask(r1, '1', zero+8, times); //not using mutexes
+	SMARTS.declareTask(rb, 'B', zero+7, times);
+	SMARTS.declareTask(r2, '2', zero+6, times); //not using mutexes
+	SMARTS.declareTask(rc, 'C', zero+5, times);
+	SMARTS.declareTask(r3, '3', zero+4, times); //not using mutexes
+	SMARTS.declareTask(rd, 'D', zero+3, times);
+	SMARTS.declareTask(re, 'E', zero+2, times);
+>>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
 
 	// SMARTS.declareTask(a, 'A', 206, 1);
 	// SMARTS.declareTask(b, 'B', 204, 1);
