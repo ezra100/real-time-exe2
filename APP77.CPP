@@ -34,6 +34,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 }
 void initMdLog()
 {
+	outputMutex.Acquire();
 	fprintf(myOutput, "TIME |");
 	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
 	{
@@ -44,6 +45,7 @@ void initMdLog()
 	{
 		fprintf(myOutput, " :---: |");
 	}
+	outputMutex.Release();
 }
 void printLoop(char name)
 {
@@ -64,10 +66,8 @@ void a()
 	mdLog("`A` acquireing 'AC mutex' ");
 	acMutex.Acquire();
 	printLoop('A');
-	mdLog("`A` sends Event to `B`, `C` and `D` ");
+	mdLog("`A` sends Event to `D` ");
 	void *data = new int[0];
-	cEvent.send('C', data, true);
-	bEvent.send('B', data, true);
 	dEvent.send('D', data, true);
 	printLoop('A');
 	mdLog("`A` releaseing `AC mutex` ");
@@ -79,7 +79,7 @@ void b()
 {
 	mdLog("`B` Start    ");
 	printLoop('B');
-	mdLog("`B` waiting for Event from `A` ");
+	mdLog("`B` waiting for Event");
 	char dummy;
 	bEvent.wait(dummy);
 	printLoop('B');
@@ -89,9 +89,14 @@ void c()
 {
 	mdLog("`C` Start   ");
 	printLoop('C');
-	mdLog("`C` waiting for Event from `A` ");
+	mdLog("`C` waiting for Event");
 	char dummy;
 	cEvent.wait(dummy);
+	printLoop('C');
+	mdLog("Sending event to `F` and `B`");
+	void *data;
+	bEvent.send('B', data, true);
+	fEvent.send('F', data, true);
 	printLoop('C');
 	mdLog(" `C` acquiring `ac mutex` ");
 	acMutex.Acquire();
@@ -104,27 +109,28 @@ void d()
 {
 	mdLog("`D` Start ");
 	printLoop('D');
-	mdLog("`D` waiting for event from `A` ");
+	mdLog("`D` waiting for event ");
 	dEvent.wait(' ');
 	printLoop('D');
+
 	mdLog("`D` acquireing 'df mutex' ");
 	dfMutex.Acquire();
 	printLoop('D');
-	mdLog("`D` sends Event to `E` and `F` ");
-	void *data = new int[0];
-	fEvent.send('F', data, true);
-	eEvent.send('E', data, true);
+	mdLog("sending event to `C`");
+	void *data;
+	cEvent.send('C', data, true);
 	printLoop('D');
 	mdLog("`D` releaseing `df mutex` ");
 	dfMutex.Release();
 	printLoop('D');
 	mdLog("`D` Finish ");
 }
+/// A-D, D-C, C-F, F-E, C-B
 void e()
 {
 	mdLog("`E` Start    ");
 	printLoop('E');
-	mdLog("`E` waiting for Event from `D` ");
+	mdLog("`E` waiting for event ");
 	char dummy;
 	eEvent.wait(dummy);
 	printLoop('E');
@@ -134,9 +140,13 @@ void f()
 {
 	mdLog("`F` Start   ");
 	printLoop('F');
-	mdLog(" `F` waiting for Event from `D` ");
+	mdLog(" `F` waiting for Event");
 	char dummy;
 	fEvent.wait(dummy);
+	printLoop('F');
+	mdLog("Sending event to `E`");
+	int *data;
+	eEvent.send('E', data, true);
 	printLoop('F');
 	mdLog(" `F` acquiring `df mutex` ");
 	dfMutex.Acquire();
@@ -267,15 +277,23 @@ void main()
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(ra, 'A', 406, 1);
-	SMARTS.declareTask(rb, 'B', 405, 1);
-	SMARTS.declareTask(rc, 'C', 404, 1);
-	SMARTS.declareTask(rd, 'D', 403, 1);
-	SMARTS.declareTask(re, 'E', 402, 1);
+	SMARTS.declareTask(ra, 'A', 206, 1);
+	SMARTS.declareTask(rb, 'B', 205, 1);
+	SMARTS.declareTask(rc, 'C', 204, 1);
+	SMARTS.declareTask(rd, 'D', 203, 1);
+	SMARTS.declareTask(re, 'E', 202, 1);
+
+	// SMARTS.declareTask(a, 'A', 206, 1);
+	// SMARTS.declareTask(b, 'B', 204, 1);
+	// SMARTS.declareTask(c, 'C', 202, 1);
+	// SMARTS.declareTask(d, 'D', 205, 1);
+	// SMARTS.declareTask(e, 'E', 203, 1);
+	// SMARTS.declareTask(f, 'F', 201, 1);
+
 	initMdLog();
 	SMARTS.runTheTasks(); //
 	fclose(myOutput);
-	printf("Finished");
+	//printf("Finished");
 	int x;
 	cin >> x;
 }

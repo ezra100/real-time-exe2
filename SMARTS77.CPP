@@ -154,7 +154,7 @@ void Parallelism::countdownTasks()
 	for (int i = 0; i < totalTasks; i++)
 	{
 		//debug
-		//printf(" %c:%d,%d,%d; ", context[i].name, context[i].status, context[i].cyclesNumCountdown, context[i].nextCycleCountdown);
+		printf(" %c:%d,%d,%d; ", context[i].name, context[i].status, context[i].cyclesNumCountdown, context[i].nextCycleCountdown);
 		if (context[i].status == FINISHED_ALL_CYCLES)
 		{
 			continue;
