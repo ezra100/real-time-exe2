@@ -337,7 +337,6 @@ void main()
 	SMARTS.declareTask(r3, '3', zero+4, times); //not using mutexes
 	SMARTS.declareTask(rd, 'D', zero+3, times);
 	SMARTS.declareTask(re, 'E', zero+2, times);
->>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
 
 	// SMARTS.declareTask(a, 'A', 206, 1);
 	// SMARTS.declareTask(b, 'B', 204, 1);
