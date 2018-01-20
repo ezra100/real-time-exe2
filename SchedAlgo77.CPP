@@ -5,31 +5,29 @@
 /* SchedAlgo64.CPP, short-term scheduler algorithms                */
 /****************************************************************/
 
-
 #include "smarts77.h"
 
 int roundRobin()
-// Round Robin short-term algorithm 
+// Round Robin short-term algorithm
 {
 	int count;
 	int nextTask = (SMARTS.getCurrentTask() + 1) % SMARTS.getTotalTasks();
 	for (count = 0;
-		SMARTS.getStatus(nextTask) != READY && count < SMARTS.getTotalTasks();
-		count++)
-		nextTask = ++nextTask%SMARTS.getTotalTasks();
-	if (count == SMARTS.getTotalTasks())	// no found READY task to run
+		 SMARTS.getStatus(nextTask) != READY && count < SMARTS.getTotalTasks();
+		 count++)
+		nextTask = ++nextTask % SMARTS.getTotalTasks();
+	if (count == SMARTS.getTotalTasks()) // no found READY task to run
 		nextTask = SMARTS.getTotalTasks();
 	return nextTask;
 }
 
-
 int EDF() //@@@@@@ (ex1)
-// EDF algorithm 
+// EDF algorithm
 {
 	int i = 0;
 	for (i; SMARTS.getStatus(i) != READY && i < SMARTS.getTotalTasks(); i++) //go to first READY task.
 		if (i == SMARTS.getTotalTasks())
-			return i; //no task is READY, call scheduler (not sure thats what they want)
+			return i;										//no task is READY, call scheduler (not sure thats what they want)
 	int closestCycleTime = SMARTS.getNextCycleCountdown(i); //added "getCyclesTime" function in SMARTS
 	int closestTaskNum = i;
 
@@ -49,12 +47,13 @@ int RMS() //@@ex2
 	int i = 0;
 	for (i; SMARTS.getStatus(i) != READY && i < SMARTS.getTotalTasks(); i++) //go to first READY task.
 		if (i == SMARTS.getTotalTasks())
-			return i; //no task is READY, call scheduler
+			return i;									//no task is READY, call scheduler
 	int highestPriority = SMARTS.getCurrentPriority(i); //high (first to occur) is actually low number in code
 	int highestPriorityTask = i;
 	for (i += 1; i < SMARTS.getTotalTasks(); i++)
 	{
-	
+		//printf(" %c:%d,%d; ", SMARTS.getName(i), SMARTS.getStatus(i), SMARTS.getCurrentPriority(i));
+
 		if (SMARTS.getStatus(i) == READY && SMARTS.getCurrentPriority(i) < highestPriority)
 		{
 			highestPriority = SMARTS.getCurrentPriority(i);

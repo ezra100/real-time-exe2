@@ -28,6 +28,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 			fprintf(myOutput, "|");
 		}
 	}
+	printf(msg);
 	fprintf(myOutput, "%s", msg);
 	lastMdTask = currentTask;
 	outputMutex.Release();
@@ -165,7 +166,7 @@ void ra()
 	abMutex.Acquire();
 	printLoop('A');
 	mdLog("`A` sends Event to `B` ");
-	void *data = new int[0];
+	void *data;
 	bEvent.send('B', data, true);
 	printLoop('A');
 	mdLog("`A` releaseing `AB mutex` ");
@@ -184,7 +185,7 @@ void rb()
 	bcMutex.Acquire();
 	printLoop('B');
 	mdLog("`B` sends Event to `C` ");
-	void *data = new int[0];
+	void *data;
 	cEvent.send('C', data, true);
 	printLoop('B');
 	mdLog("`B` acquireing 'AB mutex' ");
@@ -209,7 +210,7 @@ void rc()
 	cdMutex.Acquire();
 	printLoop('C');
 	mdLog("`C` sends Event to `C` ");
-	void *data = new int[0];
+	void *data;
 	dEvent.send('D', data, true);
 	printLoop('C');
 	mdLog("`C` acquireing 'BC mutex' ");
@@ -234,7 +235,7 @@ void rd()
 	deMutex.Acquire();
 	printLoop('D');
 	mdLog("`D` sends Event to `E` ");
-	void *data = new int[0];
+	void *data;
 	eEvent.send('E', data, true);
 	printLoop('D');
 	mdLog("`D` acquireing 'CD mutex' ");
@@ -277,11 +278,11 @@ void main()
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-	SMARTS.declareTask(ra, 'A', 406, 1);
-	SMARTS.declareTask(rb, 'B', 405, 1);
-	SMARTS.declareTask(rc, 'C', 404, 1);
-	SMARTS.declareTask(rd, 'D', 403, 1);
-	SMARTS.declareTask(re, 'E', 402, 1);
+	SMARTS.declareTask(ra, 'A', 206, 2);
+	SMARTS.declareTask(rb, 'B', 205, 2);
+	SMARTS.declareTask(rc, 'C', 204, 2);
+	SMARTS.declareTask(rd, 'D', 203, 2);
+	SMARTS.declareTask(re, 'E', 202, 2);
 
 	// SMARTS.declareTask(a, 'A', 206, 1);
 	// SMARTS.declareTask(b, 'B', 204, 1);
