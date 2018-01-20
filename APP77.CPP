@@ -210,12 +210,7 @@ void rc()
 	mdLog("C acquireing 'CD mutex' ");
 	cdMutex.Acquire();
 	printLoop('C');
-<<<<<<< HEAD
-	mdLog("C sends Event to C ");
-=======
-	mdLog("`C` sends Event to `D` ");
->>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
-	void *data;
+	mdLog("`C` sends Event to `D` ");	void *data;
 	dEvent.send('D', data, true);
 	printLoop('C');
 	mdLog("C acquireing 'BC mutex' ");
@@ -262,15 +257,13 @@ void re()
 	char dummy;
 	eEvent.wait(dummy);
 	printLoop('E');
-<<<<<<< HEAD
-	mdLog("E acquireing 'DE mutex' ");
-=======
+
+	mdLog("E sending events to 1,2,3 ");
 	void *data;
 	event1.send('1',data,true);
 	event2.send('2',data,true);
 	event3.send('3',data,true);
 	mdLog("`E` acquireing `DE mutex` ");
->>>>>>> cec6b6fbe2d6079497d09bb42a8665d68ef06352
 	deMutex.Acquire();
 	printLoop('E');
 	mdLog("E releaseing DE mutex ");
@@ -333,13 +326,7 @@ void main()
 	printf("WITHOUT priority inheritance\n-------------------------");
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
-<<<<<<< HEAD
-	SMARTS.declareTask(ra, 'A', 206, 5);
-	SMARTS.declareTask(rb, 'B', 205, 5);
-	SMARTS.declareTask(rc, 'C', 204, 5);
-	SMARTS.declareTask(rd, 'D', 203, 5);
-	SMARTS.declareTask(re, 'E', 202, 5);
-=======
+
 	int zero=400;
 	int times=1;
 	SMARTS.declareTask(ra, 'A', zero+9, times);
