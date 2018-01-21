@@ -11,7 +11,6 @@
 // Rotem Haimov רותם חיימוב
 // תשע"ח 2017-8
 
-
 #include "smarts77.h"
 #include "string.h"
 #include "STDARG.H"
@@ -54,6 +53,12 @@ void mdLog(const char _FAR *msg, int newLine = true)
 void initMdLog()
 {
 	//outputMutex.Acquire();
+	fprintf(myOutput, "<!--this is a markdown file, in VSCode use Ctrl + Shift + V to view it, or search google for other options-->\n");
+#ifdef priority_inheritance
+	fprintf(myOutput, "## **WITH** priority inheritance\n");
+#else
+	fprintf(myOutput, "## **WITHOUT** priority inheritance\n");
+#endif
 	fprintf(myOutput, "TIME |");
 	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
 	{
