@@ -31,6 +31,10 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	{
 		fprintf(myOutput, "\nnote over %c: %s", SMARTS.getCurrentName(), msg);
 	}
+	else
+	{
+		fprintf(myOutput, "%s", msg);
+	}
 	lastMdTask = currentTask;
 	//SMARTS.contextSwitchOn();
 	outputMutex.Release();
