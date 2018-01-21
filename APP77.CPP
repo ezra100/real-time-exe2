@@ -62,13 +62,13 @@ mdLogRelease(char *target)
 void initMdLog()
 {
 	//outputMutex.Acquire();
-	fprintf(myOutput, "<!--this is a markdown file, in VSCode use Ctrl + Shift + V to view it, or search google for other options-->\n");
+	fprintf(myOutput, "<!--this is a markdown file + mermeid diagram, in VSCode use Ctrl + Shift + V to view it, or search google for other options-->\n");
 #ifdef priority_inheritance
 	fprintf(myOutput, "## **WITH** priority inheritance\n");
 #else
 	fprintf(myOutput, "## **WITHOUT** priority inheritance\n");
 #endif
-	fprintf(myOutput, "```mermaid\nsequenceDiagram\n");
+	fprintf(myOutput, "```mermaid\nsequenceDiagram\n\%\%This is a mermeid diagram to view it graphically use VSCode + comaptible extension\n");
 	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
 	{
 		fprintf(myOutput, "participant %c\n", SMARTS.getName(i));
