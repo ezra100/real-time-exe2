@@ -5,6 +5,13 @@
 /* update  Tishrey   5777                                           */
 /* APP77.CPP, an application to demonstrate SMARTS77  functioning   */
 /********************************************************************/
+
+// Modified as part of an execise in Real Time Systems by:
+// Ezra Stinmetz עזרא שטיינמעץ
+// Rotem Haimov רותם חיימוב
+// תשע"ח 2017-8
+
+
 #include "smarts77.h"
 #include "string.h"
 #include "STDARG.H"

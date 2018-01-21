@@ -5,6 +5,13 @@
 /* update  Tishrey   5777                                           */
 /* SMARTS77.H, main header file                                     */
 /********************************************************************/
+
+// Modified as part of an execise in Real Time Systems by:
+// Ezra Stinmetz עזרא שטיינמעץ
+// Rotem Haimov רותם חיימוב
+// תשע"ח 2017-8
+
+//comment the next line in order to disable priority inheritance
 #define priority_inheritance 0
 
 #include <conio.h>

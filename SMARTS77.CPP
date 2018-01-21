@@ -5,6 +5,14 @@
 /* update  Tishrey   5777                                       */
 /* SMARTS77.CPP, SMARTS class body                              */
 /****************************************************************/
+
+// Modified as part of an execise in Real Time Systems by:
+// Ezra Stinmetz עזרא שטיינמעץ
+// Rotem Haimov רותם חיימוב
+// תשע"ח 2017-8
+
+
+
 #include "smarts77.h"
 #include <string.h>
 
