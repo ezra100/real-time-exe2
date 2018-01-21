@@ -19,7 +19,7 @@ void far interrupt timerInterruptHandler(...)
 	asm	mov	ax, ss;		// by the clock or by a Program interrupt
 	asm	mov	StackSegAct, ax;
 
-	SMARTS.timerClocksEnd = getTimerClocks();
+	//SMARTS.timerClocksEnd = getTimerClocks();
 
 	// if it was called by the timer interrupt (hardware source),
 	// it calls the original BIOS routine. not to change the PC work.
@@ -42,9 +42,10 @@ void far interrupt timerInterruptHandler(...)
 		SMARTS.restoreSchedStack();	      // prepare activation of the task "scheduler"
 		SMARTS.getSchedStack(StackSegAct, StackPtrAct);
 		asm	mov	ax, StackSegAct;
-		asm	mov	ss, ax
-		asm	mov	sp, StackPtrAct
+		asm	mov	ss, ax;
+		asm	mov	sp, StackPtrAct;
 	}
+
 	// else if 'context switch' flag=false set 'end of time slice' flag
 //	else 
 //	{

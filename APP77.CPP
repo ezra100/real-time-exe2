@@ -18,6 +18,7 @@ Event cEvent, bEvent, eEvent, fEvent, dEvent, event1, event2, event3;
 int lastMdTask = -1;
 void mdLog(const char _FAR *msg, int newLine = true)
 {
+	//SMARTS.contextSwitchOff();
 	outputMutex.Acquire();
 	int currentTask = SMARTS.getCurrentTask();
 	if (newLine || lastMdTask != currentTask)
@@ -25,12 +26,14 @@ void mdLog(const char _FAR *msg, int newLine = true)
 		int i;
 		//debug
 		// fprintf(myOutput, "\n%d | ", SMARTS.getTimePassed());
-		// for (int i = 0; i < SMARTS.getTotalTasks(); i++)
+		// printf("\n%d | ", SMARTS.getTimePassed());
+		// for (i = 0; i < SMARTS.getTotalTasks(); i++)
 		// {
 		// 	fprintf(myOutput, "%c:%d,%d |", SMARTS.getName(i), SMARTS.getStatus(i), SMARTS.getCurrentPriority(i));
+		// 	printf("%c:%d,%d |", SMARTS.getName(i), SMARTS.getStatus(i), SMARTS.getCurrentPriority(i));
 		// }
 		fprintf(myOutput, "\n%d | ", SMARTS.getTimePassed());
-		for ( i = 0; i < currentTask; i++)
+		for (i = 0; i < currentTask; i++)
 		{
 			fprintf(myOutput, "|");
 		}
@@ -38,6 +41,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	printf(msg);
 	fprintf(myOutput, msg);
 	lastMdTask = currentTask;
+	//SMARTS.contextSwitchOn();
 	outputMutex.Release();
 }
 void initMdLog()
@@ -335,8 +339,8 @@ void main()
 #endif
 	SMARTS.externalFunctions(timerInterruptHandler, scheduler, myTaskEnd, RMS); //@@ex2
 
-	int zero = 400;
-	int times = 1;
+	int zero = 200;
+	int times = 3;
 	SMARTS.declareTask(ra, 'A', zero + 9, times);
 	SMARTS.declareTask(r1, '1', zero + 8, times); //not using mutexes
 	SMARTS.declareTask(rb, 'B', zero + 7, times);
@@ -346,12 +350,12 @@ void main()
 	SMARTS.declareTask(rd, 'D', zero + 3, times);
 	SMARTS.declareTask(re, 'E', zero + 2, times);
 
-	// SMARTS.declareTask(a, 'A', 206, 1);
-	// SMARTS.declareTask(b, 'B', 204, 1);
-	// SMARTS.declareTask(c, 'C', 202, 1);
-	// SMARTS.declareTask(d, 'D', 205, 1);
-	// SMARTS.declareTask(e, 'E', 203, 1);
-	// SMARTS.declareTask(f, 'F', 201, 1);
+	// SMARTS.declareTask(a, 'A', 206, 3);
+	// SMARTS.declareTask(b, 'B', 204, 3);
+	// SMARTS.declareTask(c, 'C', 202, 3);
+	// SMARTS.declareTask(d, 'D', 205, 3);
+	// SMARTS.declareTask(e, 'E', 203, 3);
+	// SMARTS.declareTask(f, 'F', 201, 3);
 
 	initMdLog();
 	SMARTS.runTheTasks(); //

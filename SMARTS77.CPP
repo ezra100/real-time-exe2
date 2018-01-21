@@ -627,16 +627,21 @@ void Mutex::Acquire()
 			return; //cant insert more tasks to queue
 					//put in queue the currentTask which consists of {taskNum, Priority}
 		}
+
+		//debug
+		//printf("suspending %d", taskNum);
+
 		int taskNum = SMARTS.getCurrentTask();
 		push(taskNum);
 		updateOwnerPriority();
 		SMARTS.updateWaitingForMutex(SMARTS.getCurrentTask(), this);
-		//debug
-		//printf("suspending %d", taskNum);
 		SMARTS.suspended();
+
 		//printf("passed suspending\n");
 	}
 	owner = SMARTS.getCurrentTask();
+	SMARTS.updateWaitingForMutex(owner, NULL);
+	updateOwnerPriority();
 	level++;
 	SMARTS.addOwnedMutex(owner, this);
 	SMARTS.contextSwitchOn();
@@ -655,6 +660,7 @@ void Mutex::Release()
 		{
 			SMARTS.setTasklToOriginalPriority(owner);
 			SMARTS.removeOwnedMutex(owner, this);
+			owner = -1;
 			//debug
 			//printf("%c:%d", SMARTS.getName(owner), SMARTS.getCurrentPriority(owner));
 
@@ -667,18 +673,18 @@ void Mutex::Release()
 
 				// todo - make sure that if there's another mutex waiting for the owner
 				// the owner's priority will be updated by that mutex
-				owner = task;
-				SMARTS.updateWaitingForMutex(owner, NULL);
-				updateOwnerPriority();
+
 				SMARTS.resume(task);
 			}
 			else
+			{
 				available = 1;
+			}
 		}
 	}
 
-	SMARTS.contextSwitchOn();
 	SMARTS.callScheduler();
+	SMARTS.contextSwitchOn();
 }
 void Mutex::push(int item) //puts task into the queue
 {
