@@ -39,12 +39,12 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	//SMARTS.contextSwitchOn();
 	outputMutex.Release();
 }
-void mdLogMsg(const char _FAR *msg, char *dest)
+void mdLogMsg(const char _FAR *msg, char *dest, int dotted = false)
 {
 	//SMARTS.contextSwitchOff();
 
 	outputMutex.Acquire();
-	fprintf(myOutput, "\n%c->%s:%s", SMARTS.getCurrentName(), dest, msg);
+	fprintf(myOutput, "\n%c%s>%s:%s", SMARTS.getCurrentName(), (dotted ? "--" : "-"), dest, msg);
 	lastMdTask = -1;
 	//SMARTS.contextSwitchOn();
 	outputMutex.Release();
@@ -52,15 +52,11 @@ void mdLogMsg(const char _FAR *msg, char *dest)
 
 mdLogAcquire(char *target)
 {
-	char buffer[15];
-	sprintf(buffer, "Acquiring %s", target);
-	mdLog(buffer);
+	mdLogMsg("Acquire", target, true);
 }
 mdLogRelease(char *target)
 {
-	char buffer[15];
-	sprintf(buffer, "Releasing %s", target);
-	mdLog(buffer);
+	mdLogMsg("Release", target, true);
 }
 
 void initMdLog()
@@ -68,16 +64,10 @@ void initMdLog()
 	//outputMutex.Acquire();
 	fprintf(myOutput, "<!--this is a markdown file + mermeid diagram, in VSCode use Ctrl + Shift + V to view it, or search google for other options-->\n");
 #ifdef priority_inheritance
-	fprintf(myOutput, "## **WITH** priority inheritance\n");
+	fprintf(myOutput, "Title: With priority inheritance\n");
 #else
-	fprintf(myOutput, "## **WITHOUT** priority inheritance\n");
+	fprintf(myOutput, "Title: Without priority inheritance\n");
 #endif
-	fprintf(myOutput, "```mermaid\nsequenceDiagram\n\%\%This is a mermeid diagram to view it graphically use VSCode + comaptible extension\n");
-	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
-	{
-		fprintf(myOutput, "participant %c\n", SMARTS.getName(i));
-	}
-	//outputMutex.Release();
 }
 void printLoop(char name)
 {
@@ -382,7 +372,7 @@ void main()
 
 	initMdLog();
 	SMARTS.runTheTasks(); //
-	fprintf(myOutput, "\n```");
+	//fprintf(myOutput, "\n```");
 	fclose(myOutput);
 	//printf("Finished");
 
