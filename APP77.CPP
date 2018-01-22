@@ -39,7 +39,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	//SMARTS.contextSwitchOn();
 	outputMutex.Release();
 }
-void mdLogMsg(const char _FAR *msg, char *dest, int dotted = false)
+void mdLogMsg(const char _FAR *msg, char *dest, int dotted = true)
 {
 	//SMARTS.contextSwitchOff();
 
@@ -52,11 +52,15 @@ void mdLogMsg(const char _FAR *msg, char *dest, int dotted = false)
 
 mdLogAcquire(char *target)
 {
-	mdLogMsg("Acquire", target, true);
+	char buffer[15];
+	sprintf(buffer, "%s mutex", target);
+	mdLogMsg("Acquire", buffer, false);
 }
 mdLogRelease(char *target)
 {
-	mdLogMsg("Release", target, true);
+	char buffer[15];
+	sprintf(buffer, "%s mutex", target);
+	mdLogMsg("Release", buffer, false);
 }
 
 void initMdLog()
@@ -66,6 +70,10 @@ void initMdLog()
 #else
 	fprintf(myOutput, "Title: Without priority inheritance\n");
 #endif
+	for (int i = 0; i < SMARTS.getTotalTasks(); i++)
+	{
+		fprintf(myOutput, "participant %c\n", SMARTS.getName(i));
+	}
 }
 void printLoop(char name)
 {
