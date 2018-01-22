@@ -53,14 +53,18 @@ void mdLogMsg(const char _FAR *msg, char *dest, int dotted = true)
 mdLogAcquire(char *target)
 {
 	char buffer[15];
+	char msg [15];
 	sprintf(buffer, "%s mutex", target);
-	mdLogMsg("Acquire", buffer, false);
+	sprintf(msg, "Acquire (%s)", target);
+	mdLogMsg(msg, buffer, false);
 }
 mdLogRelease(char *target)
 {
 	char buffer[15];
+	char msg [15];
 	sprintf(buffer, "%s mutex", target);
-	mdLogMsg("Release", buffer, false);
+	sprintf(msg, "Release (%s)", target);
+	mdLogMsg(msg, buffer, false);
 }
 
 void initMdLog()
