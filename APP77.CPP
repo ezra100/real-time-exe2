@@ -61,8 +61,6 @@ mdLogRelease(char *target)
 
 void initMdLog()
 {
-	//outputMutex.Acquire();
-	fprintf(myOutput, "<!--this is a markdown file + mermeid diagram, in VSCode use Ctrl + Shift + V to view it, or search google for other options-->\n");
 #ifdef priority_inheritance
 	fprintf(myOutput, "Title: With priority inheritance\n");
 #else
@@ -191,7 +189,7 @@ void ra()
 	void *data;
 	bEvent.send('B', data, false);
 	printLoop('A');
-	mdLogMsg("acquire", "AB Mutex");
+	mdLogAcquire("AB");
 	abMutex.Release();
 	printLoop('A');
 	mdLog("A Finish ");
