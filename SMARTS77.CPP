@@ -711,7 +711,7 @@ PriorityQueue::PriorityQueue(int (*test)(int), int maxSize)
 PriorityQueue::~PriorityQueue()
 {
 	printf("priority queue DTOR running");
-	//delete[] items;
+	delete[] items;
 }
 
 int PriorityQueue::isEmpty()
