@@ -29,7 +29,7 @@ void mdLog(const char _FAR *msg, int newLine = true)
 	int currentTask = SMARTS.getCurrentTask();
 	if (newLine || lastMdTask != currentTask)
 	{
-		fprintf(myOutput, "\nnote over %c: %s", SMARTS.getCurrentName(), msg);
+		fprintf(myOutput, "\nnote over %c: %d: %s",SMARTS.getCurrentName(),SMARTS.getTimePassed() ,  msg);
 	}
 	else
 	{
