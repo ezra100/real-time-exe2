@@ -11,8 +11,6 @@
 // Rotem Haimov רותם חיימוב
 // תשע"ח 2017-8
 
-
-
 #include "smarts77.h"
 #include <string.h>
 
@@ -581,33 +579,30 @@ void Task::removeOwnedMutex(Mutex *mutex)
 #pragma endregion
 
 #pragma region Mutex
-Mutex::Mutex() //@@ex2
+int getPriorityFunc(int task)
+{
+	return SMARTS.getCurrentPriority(task);
+}
+Mutex::Mutex() : queue(getPriorityFunc, MaxTask)
 {
 	size = MaxTask;
 	available = 1;
 	owner = -1;
 	level = 0;
 	numberSuspended = 0;
-	//queue = new int[size];
-	queue = new int[size];
 }
+
 void Mutex::updateOwnerPriority()
 {
 #ifdef priority_inheritance
-	if (!numberSuspended)
+	if (queue.isEmpty())
 	{
 		return;
 	}
-	int priority = SMARTS.getCurrentPriority(queue[0]);
-	for (int i = 1; i < numberSuspended; i++)
-	{
-		if (SMARTS.getCurrentPriority(queue[i]) < priority)
-		{
-			priority = SMARTS.getCurrentPriority(queue[i]);
-		}
-	}
-	//debug
+	int priority = SMARTS.getCurrentPriority(queue.peek());
+
 	SMARTS.incrPriority(owner, priority);
+	//debug
 	//printf("owner: %d, incr priority: %d, actual priority: %d ", owner, priority, SMARTS.getCurrentPriority(owner));
 	Mutex *mutex = SMARTS.getWaitingForMutex(owner);
 	if (mutex != NULL)
@@ -627,7 +622,7 @@ void Mutex::Acquire()
 	}
 	else
 	{
-		if (numberSuspended >= size)
+		if (queue.isFull())
 		{
 			printf("ERROR number of tasks waiting for mutex is too big");
 			SMARTS.suspended();
@@ -672,7 +667,7 @@ void Mutex::Release()
 			//debug
 			//printf("%c:%d", SMARTS.getName(owner), SMARTS.getCurrentPriority(owner));
 
-			if (numberSuspended > 0)
+			if (!queue.isEmpty())
 			{
 				//get a task from queue (with highest priority)
 				int task = pop();
@@ -696,34 +691,104 @@ void Mutex::Release()
 }
 void Mutex::push(int item) //puts task into the queue
 {
-	queue[numberSuspended] = item; //task consists of {taskNum, Priority}
-	numberSuspended++;
-	//debug
-	//printf("\n putting %d, suspended: %d\t%d,%d,%d\n", item, numberSuspended, queue[0], queue[1], queue[2]);
+	queue.push(item);
 }
-void Mutex::fixQueue(int indexHole)
-{
-	queue[indexHole] = queue[numberSuspended];
-	queue[numberSuspended] = -1;
-}
+
 int Mutex::pop() //gets the highest priority task
 {
-	int highestPriority = SMARTS.getCurrentPriority(queue[0]);
-	int indexHighest = 0;
-	int highest = -1;
-	for (int i = 1; i < numberSuspended; i++)
+	return queue.pop();
+}
+#pragma endregion
+
+#pragma region PriorityQueue
+PriorityQueue::PriorityQueue(int (*test)(int), int maxSize)
+{
+	items = new int[maxSize];
+	max = maxSize;
+	this->test = test;
+	this->size = 0;
+}
+PriorityQueue::~PriorityQueue()
+{
+	printf("priority queue DTOR running");
+	//delete[] items;
+}
+
+int PriorityQueue::isEmpty()
+{
+	return size == 0;
+}
+int PriorityQueue::isFull()
+{
+	return size >= max;
+}
+
+int PriorityQueue::push(int item)
+{
+	if (size >= max)
 	{
-		if (queue[i] != -1 && SMARTS.getCurrentPriority(queue[i]) > highestPriority)
+		printf("error, queue is full");
+		return false;
+	}
+	items[size] = item;
+	size++;
+	// printf("\npush item:%d\n", item);
+	// for (int i = 0; i < size; i++)
+	// {
+	//      printf("%d:%d;", items[i], test(items[i]));
+	// }
+	return true;
+}
+int PriorityQueue::pop()
+{
+	if (isEmpty())
+	{
+		printf("error, queue is empty");
+		return -1;
+	}
+	int lowestIndex = 0;
+	for (int i = 1; i < size; i++)
+	{
+		//priority is inversed here, the lowest is the highest
+		if (test(items[i]) < test(items[lowestIndex]))
 		{
-			highestPriority = SMARTS.getCurrentPriority(queue[i]);
-			indexHighest = i;
+			lowestIndex = i;
 		}
 	}
-	highest = queue[indexHighest];
-	numberSuspended--;
-	fixQueue(indexHighest);
+	size--;
+	int lowestItem = items[lowestIndex];
+	items[lowestIndex] = items[size];
 	//debug
-	//printf("\n suspended: %d\t%d,%d,%d\n highestIndex:%d, highest: %d", numberSuspended, queue[0], queue[1], queue[2], indexHighest, highest);
-	return highest; //returns {taskNum, Priority} whose priority is highest
+	// printf("\npop highest item:%d\n", lowestItem);
+	// for (i = 0; i < size; i++)
+	// {
+	//      printf("%d:%d;", items[i], test(items[i]));
+	// }
+	return lowestItem;
 }
+
+int PriorityQueue::peek()
+{
+	if (isEmpty())
+	{
+		printf("ERROR, can't peek,queue is empty");
+		return -1;
+	}
+	int lowestIndex = 0;
+	for (int i = 1; i < size; i++)
+	{
+		//priority is inversed here, the lowe
+		if (test(items[i]) < test(items[lowestIndex]))
+		{
+			lowestIndex = i;
+		}
+	}
+	// printf("\npeek highest index:%d, size:%d\n", lowestIndex, size);
+	// for (i = 0; i < size; i++)
+	// {
+	//      printf("%d:%d;", items[i], test(items[i]));
+	// }
+	return items[lowestIndex];
+}
+
 #pragma endregion

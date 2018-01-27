@@ -50,7 +50,7 @@ void mdLogMsg(const char _FAR *msg, char *dest, int dotted = true)
 	outputMutex.Release();
 }
 
-mdLogAcquire(char *target)
+void mdLogAcquire(char *target)
 {
 	char buffer[15];
 	char msg [15];
@@ -58,7 +58,7 @@ mdLogAcquire(char *target)
 	sprintf(msg, "Acquire (%s)", target);
 	mdLogMsg(msg, buffer, false);
 }
-mdLogRelease(char *target)
+void mdLogRelease(char *target)
 {
 	char buffer[15];
 	char msg [15];

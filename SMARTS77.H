@@ -39,6 +39,23 @@ enum taskStatus
 };			 //@@@*
 class Mutex; ////
 
+class PriorityQueue
+{
+  private:
+        int *items;
+        int size;
+        int max;
+        int (*test)(int);
+
+  public:
+        PriorityQueue(int (*test)(int), int size);
+        ~PriorityQueue();
+        int pop();
+        int peek();
+        int push(int item);
+        int isEmpty();
+        int isFull();
+};
 /**********    Classes    **********/
 class Event
 { //
@@ -104,7 +121,7 @@ class Mutex //@@ex2	(implemented with a Proirity Queue)
 	int owner;
 	int level;
 	//int* queue;
-	int *queue;			 //2d array to save each task's {taskNum, Priority}
+	PriorityQueue queue;			 //2d array to save each task's {taskNum, Priority}
 	void push(int task); //puts task into the queue. task consists of {taskNum, Priority}
 	int pop();			 //gets the highest priority task
 	void fixQueue(int);  //make all elements gathered together after "Get" function (so there wont be holes)
