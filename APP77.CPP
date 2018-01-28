@@ -201,7 +201,7 @@ void ra()
 	void *data;
 	bEvent.send('B', data, false);
 	printLoop('A');
-	mdLogAcquire("AB");
+	mdLogRelease("AB");
 	abMutex.Release();
 	printLoop('A');
 	mdLog("A Finish ");
