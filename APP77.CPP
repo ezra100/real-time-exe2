@@ -181,7 +181,7 @@ void f()
 	int *data;
 	eEvent.send('E', data, false);
 	printLoop('F');
-	mdLogMsg("acquire", "DF Mutex");
+	mdLogAcquire("DF");
 	dfMutex.Acquire();
 	printLoop('F');
 	mdLogRelease("DF");
